@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const PRIMARY_URL = "https://api.themoviedb.org/3";
-const RELAY_URL = "https://netplix.shop/tmdb-api";
+const PRIMARY_URL = "https://netplix.shop/tmdb-api";
+const RELAY_URL = "https://api.themoviedb.org/3";
 export const IMAGE_BASE = "https://images.weserv.nl/?url=https://image.tmdb.org/t/p";
 const API_KEY = "36735721fd11df6180fe9deb66795321";
 
