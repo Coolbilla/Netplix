@@ -241,7 +241,7 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleRemoteInput);
   }, [currentPage]);
 
-  
+
 
   useEffect(() => {
     const focusTimer = setTimeout(() => {
