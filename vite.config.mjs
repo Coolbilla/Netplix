@@ -7,16 +7,6 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
-        }
-      }
-    }
-  },
   server: {
     allowedHosts: [
       'netplix.shop'
