@@ -6,7 +6,7 @@ import { getFirestore } from "firebase/firestore";
 // Example: authDomain: "www.my-movie-site.com"
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:"netplayer2-eba6b.firebaseapp.com",
+  authDomain:"netplix.shop",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
