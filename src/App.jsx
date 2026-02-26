@@ -18,7 +18,7 @@ import MobileMoreInfoModal from './components/MobileMoreInfoModal';
 import MoreInfoModal from './components/MoreInfoModal';
 import VibeSearch from './components/VibeSearch';
 import Search from './pages/Search';
-import LiveTV from './pages/LiveTV';
+import LiveTV from './pages/LiveTv';
 import TVMoreInfo from './tv/TVMoreInfo';
 import CustomLivePlayer from './components/CustomLivePlayer';
 import { useBackButtonInterceptor } from './hooks/useBackButtonInterceptor'; // Adjust path if needed
