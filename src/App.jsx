@@ -254,6 +254,23 @@ const App = () => {
     return () => clearTimeout(focusTimer);
   }, [currentPage, activeTab]);
 
+  // THE REDIRECT CATCHER: Catches the user when they bounce back from Google on mobile
+  useEffect(() => {
+    const catchRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          console.log("Successfully caught mobile redirect!", result.user);
+        }
+      } catch (error) {
+        console.error("Redirect login failed:", error);
+      }
+    };
+    catchRedirect();
+  }, []);
+
+
+
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
