@@ -241,21 +241,7 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleRemoteInput);
   }, [currentPage]);
 
-  // --- FIX FOR MOBILE REDIRECT LOOP ---
-  useEffect(() => {
-    const catchRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          console.log("Caught mobile redirect!", result.user);
-          setUser(result.user);
-        }
-      } catch (error) {
-        console.error("Redirect login failed:", error);
-      }
-    };
-    catchRedirect();
-  }, []);
+  
 
   useEffect(() => {
     const focusTimer = setTimeout(() => {
