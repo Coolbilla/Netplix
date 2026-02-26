@@ -1,5 +1,9 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/__/auth/(.*)",
+      "destination": "https://netplayer2-eba6b.firebaseapp.com/__/auth/$1"
+    }
   ]
 }
+
