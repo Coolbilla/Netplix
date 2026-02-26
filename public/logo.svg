@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bladeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF1F1F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8A0000;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="sharpShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="black" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="80" fill="#000000"/>
+  
+  <rect x="90" y="80" width="90" height="352" fill="#B91C1C" rx="4"/>
+  
+  <rect x="332" y="80" width="90" height="352" fill="#B91C1C" rx="4"/>
+  
+  <path d="M 85 80 
+           L 185 80 
+           L 427 432 
+           L 327 432 
+           Z" 
+        fill="url(#bladeGradient)" 
+        filter="url(#sharpShadow)"/>
+</svg>
