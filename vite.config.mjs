@@ -1,16 +1,16 @@
-// vite.config.mjs
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss()
-  ],
+  plugins: [react()],
+  build: {
+    // This helps Rolldown (Vite's builder) skip the "external" check
+    // and focus on finding your local files
+    rollupOptions: {
+      external: [] 
+    }
+  },
   server: {
-    allowedHosts: [
-      'edbb-122-161-64-136.ngrok-free.app'
-    ]
+    historyApiFallback: true,
   }
 })
