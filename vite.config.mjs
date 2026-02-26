@@ -19,7 +19,7 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'edbb-122-161-64-136.ngrok-free.app'
+      'netplix.shop'
     ]
   }
 });
