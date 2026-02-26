@@ -1,16 +1,14 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
+// vite.config.mjs
 export default defineConfig({
   plugins: [react()],
   build: {
-    // This helps Rolldown (Vite's builder) skip the "external" check
-    // and focus on finding your local files
     rollupOptions: {
-      external: [] 
-    }
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        },
+      },
+    },
   },
-  server: {
-    historyApiFallback: true,
-  }
-})
+});
