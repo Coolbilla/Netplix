@@ -37,7 +37,7 @@ import PartyRoom from './pages/PartyRoom';
 import PartyToast from "./components/Party/PartyToast";
 
 // Firebase Imports
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, setDoc, onSnapshot, collection, arrayUnion, arrayRemove } from "firebase/firestore";
 import { auth, db, googleProvider } from "./firebase";
 import { discordSdk } from "./discord";
@@ -84,6 +84,7 @@ const App = () => {
 
     setupDiscordActivity();
   }, []);
+  
   const [showIntro, setShowIntro] = useState(true);
   const [currentPage, setCurrentPage] = useState('Home');
   const [activeTab, setActiveTab] = useState('home');
@@ -241,8 +242,6 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleRemoteInput);
   }, [currentPage]);
 
-
-
   useEffect(() => {
     const focusTimer = setTimeout(() => {
       const focusable = document.querySelector('button, [href], input, [tabindex="0"]');
@@ -253,23 +252,6 @@ const App = () => {
     }, 500); // Small delay to allow page transition animations
     return () => clearTimeout(focusTimer);
   }, [currentPage, activeTab]);
-
-  // THE REDIRECT CATCHER: Catches the user when they bounce back from Google on mobile
-  useEffect(() => {
-    const catchRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          console.log("Successfully caught mobile redirect!", result.user);
-        }
-      } catch (error) {
-        console.error("Redirect login failed:", error);
-      }
-    };
-    catchRedirect();
-  }, []);
-
-
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -360,20 +342,20 @@ const App = () => {
     if (currentPage === 'MyList') setActiveTab('list');
   }, [currentPage]);
 
-  // FIXED: Popups blocked on mobile
-    // SMART LOGIN: Uses Popup for Desktop, Redirect for Mobile
-  const handleLogin = async () => {
-    try {
-      if (isMobile) {
-        await signInWithRedirect(auth, googleProvider);
-      } else {
-        await signInWithPopup(auth, googleProvider);
-      }
-    } catch (error) {
-      console.error("Login Error:", error);
-    }
+  // BULLETPROOF LOGIN: Forces Popup securely to bypass Mobile Tracking Prevention
+  const handleLogin = () => {
+    // The call must be direct and synchronous to avoid popup blockers
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        console.log("Logged in successfully!", result.user);
+      })
+      .catch((error) => {
+        console.error("Login Error:", error);
+        if (error.code === 'auth/popup-closed-by-user') {
+          console.log("User closed the login window.");
+        }
+      });
   };
-
 
   const handlePlay = async (media) => {
     if (media.isParty) {
