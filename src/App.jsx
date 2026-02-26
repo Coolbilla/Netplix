@@ -344,13 +344,19 @@ const App = () => {
   }, [currentPage]);
 
   // FIXED: Popups blocked on mobile
-  const handleLogin = () => {
-    if (isMobile) {
-      signInWithRedirect(auth, googleProvider).catch(err => console.error(err));
-    } else {
-      signInWithPopup(auth, googleProvider).catch(err => console.error(err));
+    // SMART LOGIN: Uses Popup for Desktop, Redirect for Mobile
+  const handleLogin = async () => {
+    try {
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        await signInWithPopup(auth, googleProvider);
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
     }
   };
+
 
   const handlePlay = async (media) => {
     if (media.isParty) {
