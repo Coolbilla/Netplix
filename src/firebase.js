@@ -5,13 +5,12 @@ import { getFirestore } from "firebase/firestore";
 // Change this to your actual custom domain (DO NOT include https://)
 // Example: authDomain: "www.my-movie-site.com"
 const firebaseConfig = {
-    apiKey: "AIzaSyB-WlCA-p4jIVPG0hysoTusuAC4FDV9eeQ",
-    authDomain: "netplix.shop",
-    projectId: "netplayer2-eba6b",
-    storageBucket: "netplayer2-eba6b.firebasestorage.app",
-    messagingSenderId: "842818078740",
-    appId: "1:842818078740:web:30127ff9885ab5dbe4ff01",
-    measurementId: "G-868S9176V8"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
