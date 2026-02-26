@@ -3,10 +3,12 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      external: [] 
-    }
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        },
+      },
+    },
   },
-  server: {
-    historyApiFallback: true,
-  }
-})
+});
