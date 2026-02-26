@@ -13,7 +13,6 @@ import AnimeHub from './pages/AnimeHub';
 import Country from './pages/Country';
 import UniversePage from './pages/UniversePage';
 import Notifications from './pages/Notifications';
-import { getAuth } from "firebase/auth";
 import StudioHub from './components/StudioHub';
 import MobileMoreInfoModal from './components/MobileMoreInfoModal';
 import MoreInfoModal from './components/MoreInfoModal';
