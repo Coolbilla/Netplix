@@ -139,11 +139,11 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
         await setDoc(doc(db, "users", user.uid), { preferences: newPrefs }, { merge: true });
     };
 
-    // --- CASE 1: LOGIN PROMPT + PROS/CONS CHART ---
+    // --- CASE 1: LOGIN PROMPT (Respects Navbar) ---
     if (!user) {
         return (
-            <div className="min-h-screen bg-[#020617] pt-32 pb-20 px-6 overflow-y-auto">
-                <div className="max-w-4xl mx-auto flex flex-col items-center gap-12">
+            <div className="w-full flex flex-col items-center justify-center bg-[#020617] pt-10 pb-20 px-6 animate-in fade-in duration-700">
+                <div className="max-w-4xl mx-auto flex flex-col items-center gap-12 w-full">
                     
                     {/* Login Card */}
                     <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/5 text-center w-full max-w-2xl relative overflow-hidden bg-white/[0.01]">
@@ -152,7 +152,7 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
                             <Lock className="text-neon-cyan" size={36} />
                         </div>
                         <h2 className="text-3xl md:text-5xl font-black italic text-white uppercase tracking-tighter mb-4">Neural Link Offline</h2>
-                        <p className="text-zinc-500 text-sm md:text-base mb-10 leading-relaxed uppercase tracking-widest font-bold">Initialize connection to unlock your personal viewing archive.</p>
+                        <p className="text-zinc-500 text-sm md:text-base mb-10 leading-relaxed uppercase tracking-widest font-bold opacity-80">Initialize connection to unlock your personal viewing archive.</p>
                         
                         <button
                             onClick={onLogin}
@@ -170,15 +170,9 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
                                 <Crown size={18} /> Account Benefits
                             </h3>
                             <ul className="space-y-4">
-                                {[
-                                    "Save movies to 'My List' across devices",
-                                    "Resume exactly where you left off",
-                                    "Host & Join global Watch Parties",
-                                    "Custom username & profile avatar",
-                                    "AI-powered tailored recommendations"
-                                ].map((text, i) => (
+                                {["Save movies to 'My List'", "Resume exactly where you left off", "Host & Join global Watch Parties", "Custom profile & Bottts avatar", "Neural tailored recommendations"].map((text, i) => (
                                     <li key={i} className="flex items-start gap-3 text-zinc-300 text-xs font-bold leading-relaxed">
-                                        <div className="mt-1 p-0.5 bg-neon-cyan/20 rounded text-neon-cyan"><Check size={12} /></div>
+                                        <div className="mt-1 p-0.5 bg-neon-cyan/20 rounded text-neon-cyan flex-shrink-0"><Check size={12} /></div>
                                         {text}
                                     </li>
                                 ))}
@@ -191,15 +185,9 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
                                 <AlertCircle size={18} /> Guest Limitations
                             </h3>
                             <ul className="space-y-4">
-                                {[
-                                    "Viewing history resets on page refresh",
-                                    "Cannot save movies to a personal list",
-                                    "No access to Watch Party features",
-                                    "Generic guest identity assigned",
-                                    "Limited access to advanced neural search"
-                                ].map((text, i) => (
+                                {["Viewing history resets on refresh", "No access to personal watchlist", "No Watch Party hosting privileges", "Generic guest identity", "Basic search priority"].map((text, i) => (
                                     <li key={i} className="flex items-start gap-3 text-zinc-500 text-xs font-bold leading-relaxed">
-                                        <div className="mt-1 p-0.5 bg-red-500/20 rounded text-red-500"><X size={12} /></div>
+                                        <div className="mt-1 p-0.5 bg-red-500/20 rounded text-red-500 flex-shrink-0"><X size={12} /></div>
                                         {text}
                                     </li>
                                 ))}
@@ -215,12 +203,8 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
     const toggleSetting = (setting) => setActiveSetting(activeSetting === setting ? null : setting);
 
     return (
-        <div className="min-h-screen bg-[#020617] pt-28 pb-32 px-6 md:px-12 relative overflow-hidden">
-            {/* Environmental FX */}
-            <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-neon-cyan/5 rounded-full blur-[120px] pointer-events-none -z-10" />
-            <div className="absolute bottom-0 left-[-5%] w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[120px] pointer-events-none -z-10" />
-
-            <div className="max-w-4xl mx-auto flex flex-col gap-6 relative z-10">
+        <div className="w-full bg-[#020617] pb-32 px-6 md:px-12 relative">
+            <div className="max-w-4xl mx-auto flex flex-col gap-6 relative z-10 pt-10">
                 <button 
                     onClick={() => setCurrentPage('Home')}
                     className="flex items-center gap-2 text-zinc-500 hover:text-neon-cyan transition-colors w-fit group cursor-pointer"
