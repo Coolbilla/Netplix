@@ -604,9 +604,12 @@ const App = () => {
         {currentPage === 'MyList' && (
           <MyList user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
         )}
+        
+        {/* FIX: ROUTE WRAPPED IN CONDITION TO PREVENT OVERLAP */}
         {currentPage === 'Profile' && (
-          <Profile user={user} onLogin={handleLogin} />
+          <Profile user={user} onLogin={handleLogin} setCurrentPage={setCurrentPage} />
         )}
+
         {(currentPage === 'Marvel' || currentPage === 'DC' || currentPage === 'Disney' || currentPage === 'StarWars') && <UniversePage type={currentPage.toLowerCase()} user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />}
         {currentPage === 'Notifications' && <Notifications onMoreInfo={setSelectedMoreInfo} handlePlay={handlePlay} />}
 
