@@ -3,7 +3,10 @@
     {
       "source": "/__/auth/(.*)",
       "destination": "https://netplayer2-eba6b.firebaseapp.com/__/auth/$1"
+    },
+    {
+      "source": "/tmdb-api/(.*)",
+      "destination": "https://api.themoviedb.org/3/$1"
     }
   ]
 }
-
