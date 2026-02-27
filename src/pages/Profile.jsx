@@ -142,7 +142,7 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
     // --- CASE 1: LOGIN PROMPT (Respects Laptop Navbar) ---
 if (!user) {
     return (
-        <div className="w-full flex flex-col items-center justify-center bg-[#020617] pt-32 pb-20 px-6 animate-in fade-in duration-700">
+        <div className="w-full flex flex-col items-center justify-start pt-40 pb-20 px-6 animate-in fade-in duration-700">
             <div className="max-w-4xl mx-auto flex flex-col items-center gap-12 w-full">
                 
                 {/* Login Card */}
