@@ -21,12 +21,12 @@ import Search from './pages/Search';
 import LiveTV from './pages/LiveTV';
 import TVMoreInfo from './tv/TVMoreInfo';
 import CustomLivePlayer from './components/CustomLivePlayer';
-import { useBackButtonInterceptor } from './hooks/useBackButtonInterceptor'; 
+import { useBackButtonInterceptor } from './hooks/useBackButtonInterceptor'; // Adjust path if needed
 import NetplixIntro from './components/Intro';
 import FooterNav from './components/FooterNav';
 import InstallButton from './components/InstallButton';
 import Navbar from './components/Navbar';
-import MobileHeader from './components/MobileHeader'; 
+import MobileHeader from './components/MobileHeader'; // ADDED MOBILE HEADER IMPORT
 
 // --- AIR-GAP: NEW TV APP IMPORT ---
 import TVApp from './tv/TVApp';
@@ -36,13 +36,10 @@ import PartyLobby from './pages/PartyLobby';
 import PartyRoom from './pages/PartyRoom';
 import PartyToast from "./components/Party/PartyToast";
 
-// --- CUSTOM AUTH MODAL IMPORT ---
-import AuthModal from './components/AuthModal';
-
-// Firebase Imports (Cleaned up to remove Google Auth popups)
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+// Firebase Imports
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, setDoc, onSnapshot, collection, arrayUnion, arrayRemove } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { auth, db, googleProvider } from "./firebase";
 import { discordSdk } from "./discord";
 
 /*
@@ -104,9 +101,6 @@ const App = () => {
   const [selectedMoreInfo, setSelectedMoreInfo] = useState(null);
   const [isVibeSearchOpen, setIsVibeSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
-  // --- ADDED THIS FOR CUSTOM AUTH MODAL ---
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // GLOBAL VOICE RECOGNITION
   const [voiceTranscript, setVoiceTranscript] = useState("");
@@ -273,8 +267,7 @@ const App = () => {
               history: data.history || [],
               preferences: data.preferences || [],
               completed: data.completed || [],
-              region: data.region || 'US',
-              username: data.username // Makes sure the new username is loaded into state
+              region: data.region || 'US'
             }));
           }
         });
@@ -349,9 +342,19 @@ const App = () => {
     if (currentPage === 'MyList') setActiveTab('list');
   }, [currentPage]);
 
-  // --- REPLACED WITH CUSTOM MODAL LOGIN ---
+  // BULLETPROOF LOGIN: Forces Popup securely to bypass Mobile Tracking Prevention
   const handleLogin = () => {
-    setShowAuthModal(true); // This opens your shiny new AuthModal
+    // The call must be direct and synchronous to avoid popup blockers
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        console.log("Logged in successfully!", result.user);
+      })
+      .catch((error) => {
+        console.error("Login Error:", error);
+        if (error.code === 'auth/popup-closed-by-user') {
+          console.log("User closed the login window.");
+        }
+      });
   };
 
   const handlePlay = async (media) => {
@@ -653,11 +656,6 @@ const App = () => {
           onPlay={handlePlay}
           onMoreInfo={(m) => { setSelectedMoreInfo(m); setIsVibeSearchOpen(false); }}
         />
-      )}
-
-      {/* --- RENDER THE NEW AUTH MODAL --- */}
-      {showAuthModal && (
-        <AuthModal onClose={() => setShowAuthModal(false)} />
       )}
 
       <InstallButton />
