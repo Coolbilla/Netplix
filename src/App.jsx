@@ -7,6 +7,7 @@ import Player from './components/Player';
 import Home from './pages/Home';
 import MyList from './pages/MyList';
 import Profile from './pages/Profile';
+import NotLoggedIn from './pages/NotLoggedIn'; // <--- ADDED THIS IMPORT
 import Movies from './pages/Movies';
 import Series from './pages/Series';
 import AnimeHub from './pages/AnimeHub';
@@ -21,12 +22,12 @@ import Search from './pages/Search';
 import LiveTV from './pages/LiveTV';
 import TVMoreInfo from './tv/TVMoreInfo';
 import CustomLivePlayer from './components/CustomLivePlayer';
-import { useBackButtonInterceptor } from './hooks/useBackButtonInterceptor'; // Adjust path if needed
+import { useBackButtonInterceptor } from './hooks/useBackButtonInterceptor'; 
 import NetplixIntro from './components/Intro';
 import FooterNav from './components/FooterNav';
 import InstallButton from './components/InstallButton';
 import Navbar from './components/Navbar';
-import MobileHeader from './components/MobileHeader'; // ADDED MOBILE HEADER IMPORT
+import MobileHeader from './components/MobileHeader'; 
 
 // --- CUSTOM AUTH POPUP ---
 import AuthModal from './components/AuthModal';
@@ -511,11 +512,7 @@ const App = () => {
           </div>
         )}
          
-        {/* --- NAVIGATION & REST OF APP BELOW --- */}
-
-      
-
-      {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
+        {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
       
       {!isPlayerActive && (
         <div className="relative z-[9000]">
@@ -560,6 +557,17 @@ const App = () => {
             onJoinParty={(id) => { setActivePartyId(id); setCurrentPage('PartyRoom'); }}
             setCurrentPage={setCurrentPage}
           />
+        )}
+
+        {/* --- SPLIT PROFILE ROUTING LOGIC --- */}
+        {currentPage === 'Profile' && (
+          <div className="relative w-full z-10">
+             {user ? (
+                <Profile user={user} setCurrentPage={setCurrentPage} />
+             ) : (
+                <NotLoggedIn onLogin={handleLogin} setCurrentPage={setCurrentPage} />
+             )}
+          </div>
         )}
 
         {currentPage === 'Party' && !isPlayerActive && (
@@ -607,17 +615,6 @@ const App = () => {
         )}
         {currentPage === 'MyList' && (
           <MyList user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
-        )}
-        
-        {/* --- PROFILE PAGE (SCOPED CONTAINER FIX) --- */}
-        {currentPage === 'Profile' && (
-          <div className="relative w-full z-10">
-            <Profile
-              user={user}
-              onLogin={handleLogin}
-              setCurrentPage={setCurrentPage}
-            />
-          </div>
         )}
 
         {(currentPage === 'Marvel' || currentPage === 'DC' || currentPage === 'Disney' || currentPage === 'StarWars') && <UniversePage type={currentPage.toLowerCase()} user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />}
