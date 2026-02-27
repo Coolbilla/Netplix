@@ -502,10 +502,18 @@ const App = () => {
   }
 
   // --- EXISTING MOBILE/DESKTOP RENDER ---
-  return (
-    <div className="min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30 overflow-x-hidden">
+    return (
+      <div className="min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30 overflow-x-hidden">
+    
+        {showIntro && (
+          <div className="fixed inset-0 z-[10000]">
+            <NetplixIntro onComplete={() => setShowIntro(false)} />
+          </div>
+        )}
+         
+        {/* --- NAVIGATION & REST OF APP BELOW --- */}
 
-      {showIntro && <NetplixIntro onComplete={() => setShowIntro(false)} />}
+      
 
       {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
       
