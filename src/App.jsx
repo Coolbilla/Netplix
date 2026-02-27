@@ -508,9 +508,9 @@ const App = () => {
       {showIntro && <NetplixIntro onComplete={() => setShowIntro(false)} />}
 
       {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
+      
       {!isPlayerActive && (
-        <div className="relative z-[9999]">
-          {/* MOBILE AERO-HEADER */}
+        <div className="relative z-[9000]">
           <div className="md:hidden">
             <MobileHeader
               user={user}
@@ -520,8 +520,7 @@ const App = () => {
               onLogin={handleLogin}
             />
           </div>
-
-          {/* DESKTOP NAVBAR */}
+      
           <div className="hidden md:block">
             <Navbar
               user={user}
