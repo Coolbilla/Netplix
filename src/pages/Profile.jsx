@@ -3,7 +3,7 @@ import {
     LogOut, Heart, Clock, User as UserIcon, Settings,
     Shield, Crown, CheckCircle, ChevronDown, Globe, Search as SearchIcon,
     Edit2, X, Sparkles, Activity, ShieldAlert, Zap, TrendingUp,
-    ChevronLeft, ChevronRight // <--- Ensure this is here!
+    ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import { getAuth, signOut, updateProfile } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -90,8 +90,6 @@ const COUNTRIES = [
     { code: "VA", name: "Vatican City" }, { code: "VE", name: "Venezuela" }, { code: "VN", name: "Vietnam" },
     { code: "YE", name: "Yemen" }, { code: "ZM", name: "Zambia" }, { code: "ZW", name: "Zimbabwe" }
 ];
-
-
 
 const StatCard = ({ icon, label, value, color, unit }) => {
     const isPurple = color === 'purple';
@@ -190,47 +188,6 @@ const Profile = ({ user, onLogin }) => {
     const auth = getAuth();
     const db = getFirestore();
 
-    // --- FIX: Secure Login Handler ---
-    const handleSecureLogin = (e) => {
-        // Prevent default form submission or link following that might interrupt the redirect
-        if (e) e.preventDefault();
-        console.log("Establish Connection Button Clicked!");
-
-        if (typeof onLogin === 'function') {
-            console.log("Firing onLogin function from App.jsx...");
-            onLogin();
-        } else {
-            console.error("ERROR: onLogin prop is not a function or is missing!");
-        }
-    };
-
-    // --- CASE 1: UNAUTHORIZED (LOGIN SCREEN) ---
-    if (!user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#020617] p-6 relative overflow-hidden">
-                {/* Background FX */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-cyan/10 rounded-full blur-[120px] pointer-events-none" />
-
-                <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/5 text-center max-w-xl animate-in fade-in zoom-in duration-700 relative z-10">
-                    <div className="w-24 h-24 bg-neon-cyan/10 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-neon-cyan/20 shadow-neon">
-                        <ShieldAlert className="text-neon-cyan" size={48} />
-                    </div>
-                    <h2 className="text-4xl font-black italic text-white uppercase tracking-tighter mb-6">Unauthorized Access</h2>
-                    <p className="text-zinc-500 text-sm md:text-base mb-12 leading-relaxed italic uppercase tracking-widest opacity-80">
-                        Secure uplink required. Please initialize connection to synchronize your archive and playback history.
-                    </p>
-                    <button
-                        onClick={handleSecureLogin}
-                        className="w-full bg-white text-black font-black py-5 rounded-2xl hover:bg-neon-cyan transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-neon-cyan text-xs tracking-[0.3em] cursor-pointer"
-                    >
-                        ESTABLISH CONNECTION
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // --- CASE 2: AUTHORIZED (PROFILE DASHBOARD) ---
     const handleLogout = () => signOut(auth);
     const toggleSetting = (setting) => setActiveSetting(activeSetting === setting ? null : setting);
 
@@ -284,9 +241,14 @@ const Profile = ({ user, onLogin }) => {
                     <div className="absolute top-0 right-0 p-8 opacity-5"><Activity size={120} /></div>
 
                     {/* Avatar Logic */}
-                    <div className="relative group cursor-pointer" onClick={() => setShowAvatarSelect(true)}>
+                    <div className="relative group cursor-pointer flex-shrink-0" onClick={() => setShowAvatarSelect(true)}>
                         <div className="w-28 h-28 md:w-36 md:h-36 rounded-3xl overflow-hidden border-2 border-neon-cyan shadow-neon group-hover:opacity-50 transition-all duration-500 bg-zinc-900">
-                            <img src={user.photoURL || AVATARS[0]} alt="Profile" className="w-full h-full object-cover" />
+                            {/* DYNAMIC AVATAR INJECTION */}
+                            <img 
+                                src={user?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || user?.email}&backgroundColor=0f172a`} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover" 
+                            />
                         </div>
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="bg-neon-cyan p-3 rounded-full text-black shadow-neon"><Edit2 size={20} /></div>
@@ -298,10 +260,11 @@ const Profile = ({ user, onLogin }) => {
                             <div className="h-px w-8 bg-neon-cyan" />
                             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Verified Identity</h3>
                         </div>
+                        {/* DYNAMIC USERNAME INJECTION */}
                         <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase mb-2 leading-none truncate">
-                            {user.displayName}
+                            {user?.username || user?.displayName || user?.email?.split('@')[0]}
                         </h1>
-                        <p className="text-zinc-500 text-xs mb-8 font-bold tracking-widest uppercase opacity-60">{user.email}</p>
+                        <p className="text-zinc-500 text-xs mb-8 font-bold tracking-widest uppercase opacity-60">{user?.email}</p>
 
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                             <span className="flex items-center gap-2 bg-neon-purple/20 text-white text-[9px] uppercase font-black tracking-[0.2em] px-4 py-1.5 rounded-full border border-neon-purple/30 shadow-neon-purple">
@@ -446,7 +409,7 @@ const Profile = ({ user, onLogin }) => {
                                 <div className="p-8 pt-0 border-t border-white/5 space-y-4 bg-black/20">
                                     <div className="flex justify-between items-center mt-6">
                                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Auth Protocol</span>
-                                        <span className="text-sm font-black text-neon-cyan italic">Google Secure Uplink</span>
+                                        <span className="text-sm font-black text-neon-cyan italic">Neural DB Uplink</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Global ID</span>
