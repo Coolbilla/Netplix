@@ -549,7 +549,7 @@ const App = () => {
       }} />
 
       {/* MAIN CONTENT AREA */}
-      <main className={`animate-in fade-in duration-700 ${isPlayerActive ? 'fixed inset-0 z-[5000] bg-black p-0 m-0' : 'pt-0 pb-24 md:pb-0'}`}>
+      <main className={`animate-in fade-in duration-700 ${ isPlayerActive ? 'z-[5000]' : ''} pt-0 pb-24 md:pb-0`} >
         {currentPage === 'Home' && !isPlayerActive && (
           <Home
             continueWatching={continueWatching}
