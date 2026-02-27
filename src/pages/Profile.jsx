@@ -270,4 +270,4 @@ export default function Profile({ user, setUser }) {
   );
 }
 
-export default Profile;
+
