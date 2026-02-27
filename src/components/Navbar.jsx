@@ -111,7 +111,12 @@ const Navbar = ({ user, onVibeSearch, onSearchClick, setCurrentPage, setCategory
                     onClick={() => setCurrentPage('Profile')}
                 >
                     <div className="w-7 h-7 md:w-8 md:h-8 rounded-full border border-neon-cyan/50 p-0.5 overflow-hidden">
-                        <img src={user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ishaan'} className="w-full h-full rounded-full object-cover" alt="Profile" />
+                        {/* --- DYNAMIC DICEBEAR AVATAR ADDED HERE --- */}
+                        <img 
+                            src={user?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || user?.email || 'default'}&backgroundColor=0f172a`} 
+                            className="w-full h-full rounded-full object-cover" 
+                            alt="Profile" 
+                        />
                     </div>
                 </div>
             </div>
