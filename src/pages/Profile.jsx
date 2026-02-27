@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     LogOut, Heart, Clock, User as UserIcon, Settings,
     Shield, Crown, CheckCircle, ChevronDown, Globe, Search as SearchIcon,
     Edit2, X, Sparkles, Activity, ShieldAlert, Zap, TrendingUp,
-    ChevronLeft, ChevronRight // <--- Ensure this is here!
+    ChevronLeft, ChevronRight, Upload // <--- Added Upload icon here!
 } from 'lucide-react';
 import { getAuth, signOut, updateProfile } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -188,9 +188,7 @@ const Profile = ({ user, onLogin }) => {
     const auth = getAuth();
     const db = getFirestore();
 
-    // --- FIX: Secure Login Handler ---
     const handleSecureLogin = (e) => {
-        // Prevent default form submission or link following that might interrupt the redirect
         if (e) e.preventDefault();
         console.log("Establish Connection Button Clicked!");
 
@@ -202,11 +200,9 @@ const Profile = ({ user, onLogin }) => {
         }
     };
 
-    // --- CASE 1: UNAUTHORIZED (LOGIN SCREEN) ---
     if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#020617] p-6 relative overflow-hidden">
-                {/* Background FX */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-cyan/10 rounded-full blur-[120px] pointer-events-none" />
 
                 <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/5 text-center max-w-xl animate-in fade-in zoom-in duration-700 relative z-10">
@@ -228,7 +224,6 @@ const Profile = ({ user, onLogin }) => {
         );
     }
 
-    // --- CASE 2: AUTHORIZED (PROFILE DASHBOARD) ---
     const handleLogout = () => signOut(auth);
     const toggleSetting = (setting) => setActiveSetting(activeSetting === setting ? null : setting);
 
@@ -243,6 +238,44 @@ const Profile = ({ user, onLogin }) => {
         setSaving(false);
     };
 
+    // --- 🚀 100% FREE IMGBB UPLOAD (NO FIREBASE BILLING) ---
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload a valid image file.');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const formData = new FormData();
+            formData.append("image", file);
+            
+            // Your Personal ImgBB API Key
+            const IMGBB_API_KEY = "8f4532adb65b0ba72670bdd6ff433d05"; 
+            
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: "POST",
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const downloadURL = data.data.url;
+                await handleUpdateAvatar(downloadURL); // Saves URL to your free Firestore!
+            } else {
+                throw new Error("ImgBB server rejected the image.");
+            }
+        } catch (error) {
+            console.error("Upload Error:", error);
+            alert("Upload failed! Please check your internet connection and try again.");
+            setSaving(false);
+        }
+    };
+
     const toggleGenre = async (genre) => {
         const currentPrefs = user.preferences || [];
         const newPrefs = currentPrefs.includes(genre)
@@ -254,15 +287,10 @@ const Profile = ({ user, onLogin }) => {
     };
 
     const updateRegion = async (code) => {
-        // 1. Immediate UI Feedback (Optional)
         console.log("Synchronizing Sector...", code);
-
         try {
-            // 2. Update Firestore
             const userRef = doc(db, "users", user.uid);
             await setDoc(userRef, { region: code }, { merge: true });
-
-            // 3. Success Log
             console.log("Uplink Established.");
         } catch (error) {
             console.error("Uplink Interrupted by Firewall:", error);
@@ -271,7 +299,6 @@ const Profile = ({ user, onLogin }) => {
 
     return (
         <div className="min-h-screen bg-[#020617] pt-32 pb-32 px-6 md:px-12 relative overflow-hidden">
-            {/* Environmental FX */}
             <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-neon-cyan/5 rounded-full blur-[120px] pointer-events-none -z-10" />
             <div className="absolute bottom-0 left-[-5%] w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
@@ -281,10 +308,8 @@ const Profile = ({ user, onLogin }) => {
                 <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border-white/5 flex flex-col md:flex-row items-center gap-10 shadow-2xl relative overflow-hidden bg-white/[0.01]">
                     <div className="absolute top-0 right-0 p-8 opacity-5"><Activity size={120} /></div>
 
-                    {/* Avatar Logic */}
                     <div className="relative group cursor-pointer flex-shrink-0" onClick={() => setShowAvatarSelect(true)}>
                         <div className="w-28 h-28 md:w-36 md:h-36 rounded-3xl overflow-hidden border-2 border-neon-cyan shadow-neon group-hover:opacity-50 transition-all duration-500 bg-zinc-900">
-                            {/* DYNAMIC AVATAR INJECTION */}
                             <img 
                                 src={user?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || user?.email}&backgroundColor=0f172a`} 
                                 alt="Profile" 
@@ -301,7 +326,6 @@ const Profile = ({ user, onLogin }) => {
                             <div className="h-px w-8 bg-neon-cyan" />
                             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Verified Identity</h3>
                         </div>
-                        {/* DYNAMIC USERNAME INJECTION */}
                         <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase mb-2 leading-none truncate">
                             {user?.username || user?.displayName || user?.email?.split('@')[0]}
                         </h1>
@@ -325,13 +349,10 @@ const Profile = ({ user, onLogin }) => {
 
                 {/* 2. Stats & Neural Feed Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left Column: Your existing Stats */}
                     <div className="lg:col-span-1 space-y-6">
                         <StatCard icon={<Heart size={28} />} label="Stored Archive" value={user?.watchlist?.length} color="cyan" unit="Entries" />
                         <StatCard icon={<Clock size={28} />} label="Total Runtime" value={user?.history?.length} color="purple" unit="Cycles" />
                     </div>
-
-                    {/* Right Column: The New Neural Feed */}
                     <div className="lg:col-span-2">
                         <NeuralFeed userRegion={user.region || 'US'} />
                     </div>
@@ -392,7 +413,6 @@ const Profile = ({ user, onLogin }) => {
 
                             {activeSetting === 'region' && (
                                 <div className="p-8 pt-0 border-t border-white/5 bg-black/20">
-                                    {/* Search Field */}
                                     <div className="flex gap-3 mt-6 mb-4">
                                         <div className="relative flex-1 group">
                                             <SearchIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-neon-cyan" />
@@ -404,23 +424,16 @@ const Profile = ({ user, onLogin }) => {
                                                 onChange={(e) => setCountrySearch(e.target.value)}
                                             />
                                         </div>
-                                        <button
-                                            onClick={() => setCurrentPage('Country')}
-                                            className="px-6 py-3 bg-neon-cyan/10 border border-neon-cyan/30 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all active:scale-95 flex items-center gap-3 group whitespace-nowrap"
-                                        >
-                                            Access Sector <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                                        </button>
                                     </div>
 
-                                    {/* Scrollable Container */}
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
                                         {COUNTRIES.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((c) => (
                                             <button
                                                 key={c.code}
-                                                type="button" // Prevents form submission interference
+                                                type="button"
                                                 onClick={(e) => {
                                                     e.preventDefault();
-                                                    e.stopPropagation(); // Stops the click from "falling through"
+                                                    e.stopPropagation();
                                                     updateRegion(c.code);
                                                 }}
                                                 className={`relative z-50 flex items-center justify-between px-4 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border cursor-pointer active:scale-95 ${user.region === c.code
@@ -466,18 +479,44 @@ const Profile = ({ user, onLogin }) => {
             {/* AVATAR SELECTION MODAL */}
             {showAvatarSelect && (
                 <div className="fixed inset-0 z-[600] bg-[#020617]/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in">
-                    <div className="glass-panel p-8 md:p-12 rounded-[3rem] max-w-xl w-full border-white/10 relative shadow-2xl bg-[#0a0a0a]">
-                        <button onClick={() => setShowAvatarSelect(false)} className="absolute top-8 right-8 glass-button p-2 rounded-full text-zinc-500 hover:text-white cursor-pointer"><X size={20} /></button>
-                        <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter mb-10">Sync <span className="text-neon-cyan">Identity</span></h2>
-                        <div className="grid grid-cols-3 gap-6">
+                    <div className="glass-panel p-8 md:p-12 rounded-[3rem] max-w-xl w-full border-white/10 relative shadow-2xl bg-[#0a0a0a] overflow-hidden">
+                        <button onClick={() => setShowAvatarSelect(false)} className="absolute top-8 right-8 glass-button p-2 rounded-full text-zinc-500 hover:text-white cursor-pointer z-50"><X size={20} /></button>
+                        <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter mb-8">Sync <span className="text-neon-cyan">Identity</span></h2>
+                        
+                        {/* --- NEW: FREE IMGBB UPLOAD ZONE --- */}
+                        <div className="mb-8 relative group cursor-pointer">
+                            <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                disabled={saving}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                            />
+                            <div className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-3xl transition-all ${saving ? 'border-neon-cyan/50 bg-neon-cyan/5' : 'border-white/10 group-hover:border-neon-cyan/50 group-hover:bg-neon-cyan/5'}`}>
+                                <Upload size={32} className={`mb-3 transition-colors ${saving ? 'text-neon-cyan animate-bounce' : 'text-zinc-500 group-hover:text-neon-cyan'}`} />
+                                <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">
+                                    {saving ? 'Transmitting...' : 'Upload Custom Image'}
+                                </span>
+                                <span className="text-[9px] text-zinc-600 uppercase tracking-widest mt-2">Max Size: 32MB</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 mb-8 opacity-60">
+                            <div className="h-px w-full bg-white/10" />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 whitespace-nowrap">Or select preset</span>
+                            <div className="h-px w-full bg-white/10" />
+                        </div>
+
+                        <div className="grid grid-cols-5 gap-4">
                             {AVATARS.map((url, idx) => (
                                 <div key={idx} onClick={() => !saving && handleUpdateAvatar(url)}
-                                    className={`aspect-square rounded-[2rem] overflow-hidden cursor-pointer border-2 transition-all hover:scale-110 ${user.photoURL === url ? 'border-neon-cyan shadow-neon' : 'border-transparent opacity-40 hover:opacity-100'}`}>
+                                    className={`aspect-square rounded-[1rem] overflow-hidden cursor-pointer border-2 transition-all hover:scale-110 ${user.photoURL === url ? 'border-neon-cyan shadow-neon' : 'border-transparent opacity-40 hover:opacity-100'}`}>
                                     <img src={url} alt="ID" className="w-full h-full object-cover" />
                                 </div>
                             ))}
                         </div>
-                        {saving && <p className="text-center text-neon-cyan font-black text-[10px] uppercase tracking-[0.4em] mt-10 animate-pulse">Synchronizing Kernel...</p>}
+
+                        {saving && <p className="text-center text-neon-cyan font-black text-[10px] uppercase tracking-[0.4em] mt-8 animate-pulse">Uploading to Neural Network...</p>}
                     </div>
                 </div>
             )}
