@@ -7,7 +7,7 @@ import Player from './components/Player';
 import Home from './pages/Home';
 import MyList from './pages/MyList';
 import Profile from './pages/Profile';
-import NotLoggedIn from './pages/NotLoggedIn'; // <--- ADDED THIS IMPORT
+import NotLoggedIn from './pages/NotLoggedIn'; 
 import Movies from './pages/Movies';
 import Series from './pages/Series';
 import AnimeHub from './pages/AnimeHub';
@@ -46,18 +46,11 @@ import { doc, setDoc, onSnapshot, collection, arrayUnion, arrayRemove } from "fi
 import { auth, db, googleProvider } from "./firebase";
 import { discordSdk } from "./discord";
 
-/*
-const BASE_URL = window.location.hostname === "localhost"
-  ? "https://netplix.shop/tmdb-api"
-  : "/tmdb-api";
-*/
-
 const playNeuralTone = (type = 'start') => {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
-  // 'start' = high chirp, 'end' = low pulse
   osc.frequency.setValueAtTime(type === 'start' ? 880 : 440, ctx.currentTime);
   osc.type = 'sine';
 
@@ -72,7 +65,6 @@ const playNeuralTone = (type = 'start') => {
 };
 
 const App = () => {
-  // --- DISCORD ACTIVITY ENGINE ---
   useEffect(() => {
     const setupDiscordActivity = async () => {
       if (!discordSdk) return;
@@ -103,10 +95,8 @@ const App = () => {
   const [isVibeSearchOpen, setIsVibeSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
-  // NEW AUTH STATE
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // GLOBAL VOICE RECOGNITION
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [isGlobalListening, setIsGlobalListening] = useState(false);
   const recognitionRef = useRef(null);
@@ -121,7 +111,7 @@ const App = () => {
 
       recognitionRef.current.onstart = () => {
         setIsGlobalListening(true);
-        playNeuralTone('start'); // Futuristic "Interface Active" ping
+        playNeuralTone('start'); 
       };
 
       recognitionRef.current.onresult = (event) => {
@@ -129,7 +119,7 @@ const App = () => {
           const result = event.results[0][0].transcript;
           setVoiceTranscript(result);
         }
-        playNeuralTone('end'); // Subtle "Data Received" confirmation
+        playNeuralTone('end'); 
         setIsGlobalListening(false);
       };
 
@@ -156,20 +146,14 @@ const App = () => {
     }
   }, [isGlobalListening]);
 
-  // --- MARK 3: BACK BUTTON INTERCEPTORS ---
-
   useBackButtonInterceptor(!!activeMedia, () => setActiveMedia(null));
   useBackButtonInterceptor(!!selectedMoreInfo, () => setSelectedMoreInfo(null));
   useBackButtonInterceptor(isSearchOpen, () => setIsSearchOpen(false));
   useBackButtonInterceptor(isVibeSearchOpen, () => setIsVibeSearchOpen(false));
 
-  // --- AIR-GAP: TV STATE ---
   const [isTVMode, setIsTVMode] = useState(false);
-
-  // Party Watch States
   const [activePartyId, setActivePartyId] = useState(null);
   const [partyMedia, setPartyMedia] = useState(null);
-
   const [activeStream, setActiveStream] = useState({ name: 'Sky Sports F1', code: 'gb', url: '', image: '' });
   const [liveChannelsMatrix, setLiveChannelsMatrix] = useState({});
 
@@ -181,13 +165,11 @@ const App = () => {
     { name: 'Live TV', icon: <Radio size={16} /> },
   ];
 
-  // --- AIR-GAP: TV DETECTION ENGINE ---
   useEffect(() => {
     const checkDevice = () => {
       const ua = navigator.userAgent.toLowerCase();
       const isSmartTV = /smart-tv|tizen|webos|hbbtv|appletv|googletv|firetv/i.test(ua);
       const isBigScreen = window.innerWidth >= 1920;
-
       setIsMobile(window.innerWidth < 768);
       setIsTVMode(isSmartTV || isBigScreen);
     };
@@ -203,7 +185,6 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Spatial Navigation Engine
   useEffect(() => {
     const handleRemoteInput = (e) => {
       const focusable = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -224,6 +205,17 @@ const App = () => {
   }, [currentPage]);
 
   useEffect(() => {
+    const focusTimer = setTimeout(() => {
+      const focusable = document.querySelector('button, [href], input, [tabindex="0"]');
+      if (focusable && !isMobile) {
+        focusable.focus();
+        document.body.classList.add('is-navigating-via-remote');
+      }
+    }, 500); 
+    return () => clearTimeout(focusTimer);
+  }, [currentPage, activeTab]);
+
+  useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
@@ -238,7 +230,7 @@ const App = () => {
               preferences: data.preferences || [],
               completed: data.completed || [],
               region: data.region || 'US',
-              username: data.username // LOAD CUSTOM USERNAME
+              username: data.username 
             }));
           }
         });
@@ -289,6 +281,23 @@ const App = () => {
   }, [searchQuery, category]);
 
   useEffect(() => {
+    const handleDeepLink = () => {
+      const path = window.location.pathname;
+      if (path.startsWith('/party/')) {
+        const idFromUrl = path.split('/party/')[1];
+        if (idFromUrl) {
+          setActivePartyId(idFromUrl);
+          setCurrentPage('PartyRoom');
+        }
+      }
+    };
+
+    handleDeepLink();
+    window.addEventListener('popstate', handleDeepLink);
+    return () => window.removeEventListener('popstate', handleDeepLink);
+  }, []);
+
+  useEffect(() => {
     if (currentPage === 'Home') setActiveTab('home');
     if (currentPage === 'Party') setActiveTab('party');
     if (currentPage === 'LiveTV') setActiveTab('live');
@@ -296,7 +305,6 @@ const App = () => {
     if (currentPage === 'MyList') setActiveTab('list');
   }, [currentPage]);
 
-  // NEW DYNAMIC LOGIN TRIGGER
   const handleLogin = () => {
     setShowAuthModal(true);
   };
@@ -328,7 +336,6 @@ const App = () => {
         lastSeason: playData.season,
         lastEpisode: playData.episode,
         lastWatched: Date.now(),
-        // ADD THIS LINE SO THE DATABASE KNOWS IT'S ANIME
         isAnime: currentPage === 'Anime' || media.genre_ids?.includes(16) || false
       };
       const updatedHistory = [movieToStore, ...continueWatching.filter(m => m.id !== media.id)].slice(0, 20);
@@ -340,10 +347,7 @@ const App = () => {
     if (!user) { handleLogin(); return; }
     const userRef = doc(db, "users", user.uid);
     const mediaType = media.media_type || (media.first_air_date ? 'tv' : 'movie');
-
-    // Enhance metadata for categorization
     const isAnime = media.isAnime || media.genre_ids?.includes(16) || currentPage === 'Anime';
-
     const movieData = {
       id: media.id,
       title: media.title || media.name,
@@ -358,7 +362,6 @@ const App = () => {
     } catch (err) { console.error("Watchlist Error:", err); }
   };
 
-  // --- MARK 1: COMPLETED VAULT LOGIC ---
   const toggleCompleted = async (media) => {
     if (!user) { handleLogin(); return; }
     const userRef = doc(db, "users", user.uid);
@@ -372,7 +375,7 @@ const App = () => {
         await setDoc(userRef, { completed: arrayRemove(movieData) }, { merge: true });
       } else {
         await setDoc(userRef, { completed: arrayUnion(movieData) }, { merge: true });
-        removeFromHistory(media.id); // Purge from continue watching!
+        removeFromHistory(media.id); 
       }
     } catch (err) { console.error("Vault Error:", err); }
   };
@@ -442,17 +445,53 @@ const App = () => {
     );
   }
 
-  // --- EXISTING MOBILE/DESKTOP RENDER ---
+  // --- STRICT ROUTING RENDERER ---
+  // This physically prevents two pages from being in the DOM at the same time.
+  const renderCurrentPage = () => {
+    if (isPlayerActive) return null; // Player handles its own overlay
+
+    switch (currentPage) {
+      case 'Home':
+        return <Home continueWatching={continueWatching} user={user} handlePlay={handlePlay} onRemoveFromHistory={removeFromHistory} onMoreInfo={setSelectedMoreInfo} onJoinParty={(id) => { setActivePartyId(id); setCurrentPage('PartyRoom'); }} setCurrentPage={setCurrentPage} />;
+      case 'Profile':
+        return user ? <Profile user={user} setCurrentPage={setCurrentPage} /> : <NotLoggedIn onLogin={handleLogin} setCurrentPage={setCurrentPage} />;
+      case 'Party':
+        return <PartyLobby user={user} onJoinParty={(id) => { setActivePartyId(id); setCurrentPage('PartyRoom'); }} preselectedMedia={partyMedia} clearPreselectedMedia={() => setPartyMedia(null)} />;
+      case 'LiveTV':
+        return <LiveTV onTuneChannel={handleTuneChannel} categorizedChannels={liveChannelsMatrix} setCategorizedChannels={setLiveChannelsMatrix} />;
+      case 'LivePlayer':
+        return <CustomLivePlayer channelName={activeStream.name} streamUrl={activeStream.url} onBack={() => setCurrentPage('LiveTV')} setStreamUrl={(url) => setActiveStream(prev => ({ ...prev, url }))} setChannelName={(name) => setActiveStream(prev => ({ ...prev, name }))} categorizedSignals={liveChannelsMatrix} />;
+      case 'Movies':
+        return <Movies user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />;
+      case 'Series':
+        return <Series user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />;
+      case 'Anime':
+        return <AnimeHub user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />;
+      case 'Country':
+        return <Country user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />;
+      case 'MyList':
+        return <MyList user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />;
+      case 'Marvel':
+      case 'DC':
+      case 'Disney':
+      case 'StarWars':
+        return <UniversePage type={currentPage.toLowerCase()} user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />;
+      case 'Notifications':
+        return <Notifications onMoreInfo={setSelectedMoreInfo} handlePlay={handlePlay} />;
+      default:
+        return <Home continueWatching={continueWatching} user={user} handlePlay={handlePlay} onRemoveFromHistory={removeFromHistory} onMoreInfo={setSelectedMoreInfo} onJoinParty={(id) => { setActivePartyId(id); setCurrentPage('PartyRoom'); }} setCurrentPage={setCurrentPage} />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30 overflow-x-hidden relative">
       
       {showIntro && (
-        <div className="fixed inset-0 z-[10000]">
+        <div className="fixed inset-0 z-[10000] bg-[#020617]">
           <NetplixIntro onComplete={() => setShowIntro(false)} />
         </div>
       )}
 
-      {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
       {!isPlayerActive && (
         <div className="relative z-[9000]">
           <div className="md:hidden">
@@ -484,79 +523,14 @@ const App = () => {
         window.scrollTo(0, 0);
       }} />
 
-      {/* MAIN CONTENT AREA */}
-      <main className={`animate-in fade-in duration-700 ${ isPlayerActive ? 'z-[5000]' : ''} pt-0 pb-24 md:pb-0`} >
-        {currentPage === 'Home' && !isPlayerActive && (
-          <Home
-            continueWatching={continueWatching}
-            user={user}
-            handlePlay={handlePlay}
-            onRemoveFromHistory={removeFromHistory}
-            onMoreInfo={setSelectedMoreInfo}
-            onJoinParty={(id) => { setActivePartyId(id); setCurrentPage('PartyRoom'); }}
-            setCurrentPage={setCurrentPage}
-          />
-        )}
-
-        {/* --- SPLIT PROFILE ROUTING LOGIC --- */}
-        {currentPage === 'Profile' && (
-          <div className="relative w-full z-10">
-             {user ? (
-                <Profile user={user} setCurrentPage={setCurrentPage} />
-             ) : (
-                <NotLoggedIn onLogin={handleLogin} setCurrentPage={setCurrentPage} />
-             )}
-          </div>
-        )}
-
-        {currentPage === 'Party' && !isPlayerActive && (
-          <PartyLobby
-            user={user}
-            onJoinParty={(id) => { setActivePartyId(id); setCurrentPage('PartyRoom'); }}
-            preselectedMedia={partyMedia}
-            clearPreselectedMedia={() => setPartyMedia(null)}
-          />
-        )}
-        {currentPage === 'PartyRoom' && activePartyId && <PartyRoom partyId={activePartyId} user={user} onLeave={() => { setActivePartyId(null); setCurrentPage('Party'); }} />}
+      {/* THE MAIN CONTENT AREA */}
+      <main className={`relative animate-in fade-in duration-700 w-full ${ isPlayerActive ? 'z-[5000]' : ''} pt-0 pb-24 md:pb-0 min-h-screen`} >
         
-        {currentPage === 'LiveTV' && !isPlayerActive && (
-          <LiveTV
-            onTuneChannel={handleTuneChannel}
-            categorizedChannels={liveChannelsMatrix}
-            setCategorizedChannels={setLiveChannelsMatrix}
-          />
-        )}
+        {/* Render the active page from the switch statement */}
+        {renderCurrentPage()}
 
-        {currentPage === 'LivePlayer' && !isPlayerActive && (
-          <CustomLivePlayer
-            channelName={activeStream.name}
-            streamUrl={activeStream.url}
-            onBack={() => setCurrentPage('LiveTV')}
-            setStreamUrl={(url) => setActiveStream(prev => ({ ...prev, url }))}
-            setChannelName={(name) => setActiveStream(prev => ({ ...prev, name }))}
-            categorizedSignals={liveChannelsMatrix}
-          />
-        )}
-
-        {currentPage === 'Movies' && (
-          <Movies user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
-        )}
-        {currentPage === 'Series' && (
-          <Series user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
-        )}
-        {currentPage === 'Anime' && (
-          <AnimeHub user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
-        )}
-        {currentPage === 'Country' && (
-          <Country user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
-        )}
-        {currentPage === 'MyList' && (
-          <MyList user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
-        )}
-
-        {(currentPage === 'Marvel' || currentPage === 'DC' || currentPage === 'Disney' || currentPage === 'StarWars') && <UniversePage type={currentPage.toLowerCase()} user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />}
-        {currentPage === 'Notifications' && <Notifications onMoreInfo={setSelectedMoreInfo} handlePlay={handlePlay} />}
-
+        {/* Global Overlays (Player and Party) */}
+        {currentPage === 'PartyRoom' && activePartyId && <PartyRoom partyId={activePartyId} user={user} onLeave={() => { setActivePartyId(null); setCurrentPage('Party'); }} />}
         {activeMedia && !activePartyId && (
           <Player media={activeMedia} toggleCompleted={toggleCompleted} onClose={() => setActiveMedia(null)} />
         )}
@@ -602,7 +576,6 @@ const App = () => {
         />
       )}
 
-      {/* CUSTOM AUTH POPUP */}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} />
       )}
