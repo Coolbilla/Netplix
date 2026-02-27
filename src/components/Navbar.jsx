@@ -14,9 +14,10 @@ const Navbar = ({ user, onVibeSearch, onSearchClick, setCurrentPage, setCategory
             case 'Watch Party':
                 setCurrentPage('Party');
                 break;
-            case 'Live TV':
+            /* case 'Live TV':
                 setCurrentPage('LiveTV');
-                break;
+                break; 
+            */
             case 'My List':
                 setCurrentPage('MyList');
                 break;
@@ -37,6 +38,9 @@ const Navbar = ({ user, onVibeSearch, onSearchClick, setCurrentPage, setCategory
         }
     };
 
+    // Removed 'Live TV' from the mapped array
+    const desktopLinks = ['Home', 'Movies', 'TV Series', 'Anime', 'Country', 'My List', 'Watch Party'];
+
     return (
         <nav className="fixed top-0 w-full z-[100] px-4 md:px-12 py-4 flex items-center justify-between glass-panel !bg-[#020617]/80 !border-b-white/5 backdrop-blur-2xl transition-all duration-500">
             <div className="flex items-center gap-12">
@@ -50,7 +54,7 @@ const Navbar = ({ user, onVibeSearch, onSearchClick, setCurrentPage, setCategory
 
                 {/* MENU LINKS (Desktop Only) */}
                 <div className="hidden lg:flex items-center gap-6">
-                    {['Home', 'Movies', 'TV Series', 'Anime', 'Country', 'Live TV', 'My List', 'Watch Party'].map((link) => {
+                    {desktopLinks.map((link) => {
                         // Map the link text to the actual currentPage state string
                         const isActiveMap = {
                             'Home': 'Home',
@@ -58,7 +62,7 @@ const Navbar = ({ user, onVibeSearch, onSearchClick, setCurrentPage, setCategory
                             'TV Series': 'Series',
                             'Anime': 'Anime',
                             'Country': 'Country',
-                            'Live TV': 'LiveTV',
+                            // 'Live TV': 'LiveTV',
                             'My List': 'MyList',
                             'Watch Party': 'Party'
                         };
