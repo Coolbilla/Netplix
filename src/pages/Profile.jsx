@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
     LogOut, Heart, Clock, User as UserIcon, Settings,
-    Shield, Crown, CheckCircle, ChevronDown, Globe, Search as SearchIcon,
+    Shield, Crown, CheckCircle, ChevronDown, Globe,
     Edit2, X, Sparkles, Activity, ShieldAlert, Zap, TrendingUp,
-    ChevronLeft, ChevronRight, Upload // <--- Added Upload icon here!
+    ChevronLeft, ChevronRight, Upload
 } from 'lucide-react';
 import { getAuth, signOut, updateProfile } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -23,74 +23,6 @@ const GENRES = [
     "Music", "Mystery", "Romance", "Sci-Fi", "Thriller", "Western"
 ];
 
-const COUNTRIES = [
-    { code: "AF", name: "Afghanistan" }, { code: "AL", name: "Albania" }, { code: "DZ", name: "Algeria" },
-    { code: "AD", name: "Andorra" }, { code: "AO", name: "Angola" }, { code: "AG", name: "Antigua and Barbuda" },
-    { code: "AR", name: "Argentina" }, { code: "AM", name: "Armenia" }, { code: "AU", name: "Australia" },
-    { code: "AT", name: "Austria" }, { code: "AZ", name: "Azerbaijan" }, { code: "BS", name: "Bahamas" },
-    { code: "BH", name: "Bahrain" }, { code: "BD", name: "Bangladesh" }, { code: "BB", name: "Barbados" },
-    { code: "BY", name: "Belarus" }, { code: "BE", name: "Belgium" }, { code: "BZ", name: "Belize" },
-    { code: "BJ", name: "Benin" }, { code: "BT", name: "Bhutan" }, { code: "BO", name: "Bolivia" },
-    { code: "BA", name: "Bosnia and Herzegovina" }, { code: "BW", name: "Botswana" }, { code: "BR", name: "Brazil" },
-    { code: "BN", name: "Brunei" }, { code: "BG", name: "Bulgaria" }, { code: "BF", name: "Burkina Faso" },
-    { code: "BI", name: "Burundi" }, { code: "CV", name: "Cabo Verde" }, { code: "KH", name: "Cambodia" },
-    { code: "CM", name: "Cameroon" }, { code: "CA", name: "Canada" }, { code: "CF", name: "Central African Republic" },
-    { code: "TD", name: "Chad" }, { code: "CL", name: "Chile" }, { code: "CN", name: "China" },
-    { code: "CO", name: "Colombia" }, { code: "KM", name: "Comoros" }, { code: "CD", name: "Congo (DRC)" },
-    { code: "CG", name: "Congo (Republic)" }, { code: "CR", name: "Costa Rica" }, { code: "CI", name: "Côte d'Ivoire" },
-    { code: "HR", name: "Croatia" }, { code: "CU", name: "Cuba" }, { code: "CY", name: "Cyprus" },
-    { code: "CZ", name: "Czech Republic" }, { code: "DK", name: "Denmark" }, { code: "DJ", name: "Djibouti" },
-    { code: "DM", name: "Dominica" }, { code: "DO", name: "Dominican Republic" }, { code: "EC", name: "Ecuador" },
-    { code: "EG", name: "Egypt" }, { code: "SV", name: "El Salvador" }, { code: "GQ", name: "Equatorial Guinea" },
-    { code: "ER", name: "Eritrea" }, { code: "EE", name: "Estonia" }, { code: "SZ", name: "Eswatini" },
-    { code: "ET", name: "Ethiopia" }, { code: "FJ", name: "Fiji" }, { code: "FI", name: "Finland" },
-    { code: "FR", name: "France" }, { code: "GA", name: "Gabon" }, { code: "GM", name: "Gambia" },
-    { code: "GE", name: "Georgia" }, { code: "DE", name: "Germany" }, { code: "GH", name: "Ghana" },
-    { code: "GR", name: "Greece" }, { code: "GD", name: "Grenada" }, { code: "GT", name: "Guatemala" },
-    { code: "GN", name: "Guinea" }, { code: "GW", name: "Guinea-Bissau" }, { code: "GY", name: "Guyana" },
-    { code: "HT", name: "Haiti" }, { code: "HN", name: "Honduras" }, { code: "HU", name: "Hungary" },
-    { code: "IS", name: "Iceland" }, { code: "IN", name: "India" }, { code: "ID", name: "Indonesia" },
-    { code: "IR", name: "Iran" }, { code: "IQ", name: "Iraq" }, { code: "IE", name: "Ireland" },
-    { code: "IL", name: "Israel" }, { code: "IT", name: "Italy" }, { code: "JM", name: "Jamaica" },
-    { code: "JP", name: "Japan" }, { code: "JO", name: "Jordan" }, { code: "KZ", name: "Kazakhstan" },
-    { code: "KE", name: "Kenya" }, { code: "KI", name: "Kiribati" }, { code: "KP", name: "North Korea" },
-    { code: "KR", name: "South Korea" }, { code: "KW", name: "Kuwait" }, { code: "KG", name: "Kyrgyzstan" },
-    { code: "LA", name: "Laos" }, { code: "LV", name: "Latvia" }, { code: "LB", name: "Lebanon" },
-    { code: "LS", name: "Lesotho" }, { code: "LR", name: "Liberia" }, { code: "LY", name: "Libya" },
-    { code: "LI", name: "Liechtenstein" }, { code: "LT", name: "Lithuania" }, { code: "LU", name: "Luxembourg" },
-    { code: "MG", name: "Madagascar" }, { code: "MW", name: "Malawi" }, { code: "MY", name: "Malaysia" },
-    { code: "MV", name: "Maldives" }, { code: "ML", name: "Mali" }, { code: "MT", name: "Malta" },
-    { code: "MH", name: "Marshall Islands" }, { code: "MR", name: "Mauritania" }, { code: "MU", name: "Mauritius" },
-    { code: "MX", name: "Mexico" }, { code: "FM", name: "Micronesia" }, { code: "MD", name: "Moldova" },
-    { code: "MC", name: "Monaco" }, { code: "MN", name: "Mongolia" }, { code: "ME", name: "Montenegro" },
-    { code: "MA", name: "Morocco" }, { code: "MZ", name: "Mozambique" }, { code: "MM", name: "Myanmar" },
-    { code: "NA", name: "Namibia" }, { code: "NR", name: "Nauru" }, { code: "NP", name: "Nepal" },
-    { code: "NL", name: "Netherlands" }, { code: "NZ", name: "New Zealand" }, { code: "NI", name: "Nicaragua" },
-    { code: "NE", name: "Niger" }, { code: "NG", name: "Nigeria" }, { code: "MK", name: "North Macedonia" },
-    { code: "NO", name: "Norway" }, { code: "OM", name: "Oman" }, { code: "PK", name: "Pakistan" },
-    { code: "PW", name: "Palau" }, { code: "PA", name: "Panama" }, { code: "PG", name: "Papua New Guinea" },
-    { code: "PY", name: "Paraguay" }, { code: "PE", name: "Peru" }, { code: "PH", name: "Philippines" },
-    { code: "PL", name: "Poland" }, { code: "PT", name: "Portugal" }, { code: "QA", name: "Qatar" },
-    { code: "RO", name: "Romania" }, { code: "RU", name: "Russia" }, { code: "RW", name: "Rwanda" },
-    { code: "KN", name: "Saint Kitts and Nevis" }, { code: "LC", name: "Saint Lucia" }, { code: "VC", name: "Saint Vincent" },
-    { code: "WS", name: "Samoa" }, { code: "SM", name: "San Marino" }, { code: "ST", name: "Sao Tome and Principe" },
-    { code: "SA", name: "Saudi Arabia" }, { code: "SN", name: "Senegal" }, { code: "RS", name: "Serbia" },
-    { code: "SC", name: "Seychelles" }, { code: "SL", name: "Sierra Leone" }, { code: "SG", name: "Singapore" },
-    { code: "SK", name: "Slovakia" }, { code: "SI", name: "Slovenia" }, { code: "SB", name: "Solomon Islands" },
-    { code: "SO", name: "Somalia" }, { code: "ZA", name: "South Africa" }, { code: "SS", name: "South Sudan" },
-    { code: "ES", name: "Spain" }, { code: "LK", name: "Sri Lanka" }, { code: "SD", name: "Sudan" },
-    { code: "SR", name: "Suriname" }, { code: "SE", name: "Sweden" }, { code: "CH", name: "Switzerland" },
-    { code: "SY", name: "Syria" }, { code: "TW", name: "Taiwan" }, { code: "TJ", name: "Tajikistan" },
-    { code: "TZ", name: "Tanzania" }, { code: "TH", name: "Thailand" }, { code: "TL", name: "Timor-Leste" },
-    { code: "TG", name: "Togo" }, { code: "TO", name: "Tonga" }, { code: "TT", name: "Trinidad and Tobago" },
-    { code: "TN", name: "Tunisia" }, { code: "TR", name: "Turkey" }, { code: "TM", name: "Turkmenistan" },
-    { code: "TV", name: "Tuvalu" }, { code: "UG", name: "Uganda" }, { code: "UA", name: "Ukraine" },
-    { code: "AE", name: "United Arab Emirates" }, { code: "GB", name: "United Kingdom" }, { code: "US", name: "United States" },
-    { code: "UY", name: "Uruguay" }, { code: "UZ", name: "Uzbekistan" }, { code: "VU", name: "Vanuatu" },
-    { code: "VA", name: "Vatican City" }, { code: "VE", name: "Venezuela" }, { code: "VN", name: "Vietnam" },
-    { code: "YE", name: "Yemen" }, { code: "ZM", name: "Zambia" }, { code: "ZW", name: "Zimbabwe" }
-];
-
 const StatCard = ({ icon, label, value, color, unit }) => {
     const isPurple = color === 'purple';
     return (
@@ -108,7 +40,7 @@ const StatCard = ({ icon, label, value, color, unit }) => {
 
 const NeuralFeed = ({ userRegion = 'US' }) => {
     const [localTrends, setLocalTrends] = useState([]);
-    const [status, setStatus] = useState('idle'); // idle, scanning, locked
+    const [status, setStatus] = useState('idle');
 
     useEffect(() => {
         const fetchSectorData = async () => {
@@ -121,7 +53,6 @@ const NeuralFeed = ({ userRegion = 'US' }) => {
                     with_origin_country: userRegion
                 });
 
-                // If local data is thin, fall back to general popular in that region
                 const results = data.results.length >= 5
                     ? data.results.slice(0, 5)
                     : (await neuralFetch('/trending/all/day')).data.results.slice(0, 5);
@@ -173,30 +104,24 @@ const NeuralFeed = ({ userRegion = 'US' }) => {
                 ))}
             </div>
 
-            {/* HUD Scanline Effect */}
             <div className="absolute inset-0 pointer-events-none border-b border-neon-cyan/5 animate-scan opacity-20" />
         </div>
     );
 };
 
-const Profile = ({ user, onLogin }) => {
+// ADDED `setCurrentPage` to props so the Back button works!
+const Profile = ({ user, onLogin, setCurrentPage }) => {
     const [activeSetting, setActiveSetting] = useState(null);
     const [showAvatarSelect, setShowAvatarSelect] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [countrySearch, setCountrySearch] = useState("");
 
     const auth = getAuth();
     const db = getFirestore();
 
     const handleSecureLogin = (e) => {
         if (e) e.preventDefault();
-        console.log("Establish Connection Button Clicked!");
-
         if (typeof onLogin === 'function') {
-            console.log("Firing onLogin function from App.jsx...");
             onLogin();
-        } else {
-            console.error("ERROR: onLogin prop is not a function or is missing!");
         }
     };
 
@@ -204,7 +129,6 @@ const Profile = ({ user, onLogin }) => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#020617] p-6 relative overflow-hidden">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-cyan/10 rounded-full blur-[120px] pointer-events-none" />
-
                 <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/5 text-center max-w-xl animate-in fade-in zoom-in duration-700 relative z-10">
                     <div className="w-24 h-24 bg-neon-cyan/10 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-neon-cyan/20 shadow-neon">
                         <ShieldAlert className="text-neon-cyan" size={48} />
@@ -286,23 +210,21 @@ const Profile = ({ user, onLogin }) => {
         } catch (error) { console.error("Error updating preferences:", error); }
     };
 
-    const updateRegion = async (code) => {
-        console.log("Synchronizing Sector...", code);
-        try {
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, { region: code }, { merge: true });
-            console.log("Uplink Established.");
-        } catch (error) {
-            console.error("Uplink Interrupted by Firewall:", error);
-        }
-    };
-
     return (
-        <div className="min-h-screen bg-[#020617] pt-32 pb-32 px-6 md:px-12 relative overflow-hidden">
+        <div className="min-h-screen bg-[#020617] pt-28 pb-32 px-6 md:px-12 relative overflow-hidden">
             <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-neon-cyan/5 rounded-full blur-[120px] pointer-events-none -z-10" />
             <div className="absolute bottom-0 left-[-5%] w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-            <div className="max-w-4xl mx-auto flex flex-col gap-8 relative z-10">
+            <div className="max-w-4xl mx-auto flex flex-col gap-6 relative z-10">
+                
+                {/* --- NEW: BACK BUTTON --- */}
+                <button 
+                    onClick={() => setCurrentPage ? setCurrentPage('Home') : window.history.back()}
+                    className="flex items-center gap-2 text-zinc-500 hover:text-neon-cyan transition-colors w-fit group cursor-pointer"
+                >
+                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back to Dashboard</span>
+                </button>
 
                 {/* 1. Profile HUD Header */}
                 <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border-white/5 flex flex-col md:flex-row items-center gap-10 shadow-2xl relative overflow-hidden bg-white/[0.01]">
@@ -359,12 +281,7 @@ const Profile = ({ user, onLogin }) => {
                 </div>
 
                 {/* 3. Settings Interface */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4 mb-6 opacity-60">
-                        <div className="h-px w-10 bg-neon-cyan" />
-                        <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Kernel Config</h2>
-                    </div>
-
+                <div className="space-y-4 mt-4">
                     <div className="flex flex-col gap-4">
                         {/* GENRE PREFERENCES */}
                         <div className="glass-panel rounded-3xl border-white/5 overflow-hidden transition-all duration-500 bg-white/[0.01]">
@@ -398,7 +315,7 @@ const Profile = ({ user, onLogin }) => {
                             )}
                         </div>
 
-                        {/* REGION INTERFACE */}
+                        {/* --- NEW: COMPACT, SCROLL-FREE REGION INTERFACE --- */}
                         <div className="glass-panel rounded-3xl border-white/5 overflow-hidden transition-none bg-white/[0.01]">
                             <div onClick={() => toggleSetting('region')} className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/[0.02]">
                                 <div className="flex items-center gap-5">
@@ -413,38 +330,17 @@ const Profile = ({ user, onLogin }) => {
 
                             {activeSetting === 'region' && (
                                 <div className="p-8 pt-0 border-t border-white/5 bg-black/20">
-                                    <div className="flex gap-3 mt-6 mb-4">
-                                        <div className="relative flex-1 group">
-                                            <SearchIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-neon-cyan" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search Sector..."
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-xs font-bold text-white outline-none focus:border-neon-cyan/50 focus:ring-0 transition-all"
-                                                value={countrySearch}
-                                                onChange={(e) => setCountrySearch(e.target.value)}
-                                            />
+                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mt-6">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Active Sector</p>
+                                            <p className="text-2xl font-black text-white italic tracking-widest uppercase">{user.region || 'US'}</p>
                                         </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
-                                        {COUNTRIES.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((c) => (
-                                            <button
-                                                key={c.code}
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    updateRegion(c.code);
-                                                }}
-                                                className={`relative z-50 flex items-center justify-between px-4 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border cursor-pointer active:scale-95 ${user.region === c.code
-                                                    ? 'bg-neon-cyan text-black border-transparent shadow-neon'
-                                                    : 'glass-panel border-white/10 text-zinc-500 hover:border-white/30 hover:text-white hover:bg-white/10'
-                                                    }`}
-                                            >
-                                                <span className="truncate pointer-events-none">{c.name}</span>
-                                                <span className="text-[8px] opacity-40 ml-2 pointer-events-none">{c.code}</span>
-                                            </button>
-                                        ))}
+                                        <button
+                                            onClick={() => setCurrentPage && setCurrentPage('Country')}
+                                            className="px-8 py-4 bg-neon-cyan/10 border border-neon-cyan/30 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all active:scale-95 flex items-center gap-3 group whitespace-nowrap"
+                                        >
+                                            Modify Sector Data <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                        </button>
                                     </div>
                                 </div>
                             )}
