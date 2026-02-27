@@ -75,9 +75,7 @@ const App = () => {
   // --- DISCORD ACTIVITY ENGINE ---
   useEffect(() => {
     const setupDiscordActivity = async () => {
-      // If we aren't in Discord, stop right here. Let the normal website run.
       if (!discordSdk) return;
-
       try {
         await discordSdk.ready();
         console.log("Discord SDK Initialized! Running inside Voice Channel 🚀");
@@ -85,7 +83,6 @@ const App = () => {
         console.error("Discord setup failed:", err);
       }
     };
-
     setupDiscordActivity();
   }, []);
   
@@ -154,7 +151,6 @@ const App = () => {
         recognitionRef.current.start();
       } catch (err) {
         console.error("Voice start error", err);
-        // Handle case where recognition was already started but state didn't update
         setIsGlobalListening(false);
       }
     }
@@ -162,29 +158,10 @@ const App = () => {
 
   // --- MARK 3: BACK BUTTON INTERCEPTORS ---
 
-  // 1. Trap the Back Button if the Movie Player is open
-  useBackButtonInterceptor(
-    !!activeMedia,
-    () => setActiveMedia(null)
-  );
-
-  // 2. Trap the Back Button if the "More Info" Modal is open
-  useBackButtonInterceptor(
-    !!selectedMoreInfo,
-    () => setSelectedMoreInfo(null)
-  );
-
-  // 3. Trap the Back Button if the Search screen is open
-  useBackButtonInterceptor(
-    isSearchOpen,
-    () => setIsSearchOpen(false)
-  );
-
-  // 4. Trap the Back Button if the AI Vibe Search is open
-  useBackButtonInterceptor(
-    isVibeSearchOpen,
-    () => setIsVibeSearchOpen(false)
-  );
+  useBackButtonInterceptor(!!activeMedia, () => setActiveMedia(null));
+  useBackButtonInterceptor(!!selectedMoreInfo, () => setSelectedMoreInfo(null));
+  useBackButtonInterceptor(isSearchOpen, () => setIsSearchOpen(false));
+  useBackButtonInterceptor(isVibeSearchOpen, () => setIsVibeSearchOpen(false));
 
   // --- AIR-GAP: TV STATE ---
   const [isTVMode, setIsTVMode] = useState(false);
@@ -208,7 +185,6 @@ const App = () => {
   useEffect(() => {
     const checkDevice = () => {
       const ua = navigator.userAgent.toLowerCase();
-      // Detects Smart TVs, Consoles, and massive monitors
       const isSmartTV = /smart-tv|tizen|webos|hbbtv|appletv|googletv|firetv/i.test(ua);
       const isBigScreen = window.innerWidth >= 1920;
 
@@ -227,7 +203,7 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Spatial Navigation Engine (Remote/DPad Support)
+  // Spatial Navigation Engine
   useEffect(() => {
     const handleRemoteInput = (e) => {
       const focusable = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -235,8 +211,6 @@ const App = () => {
       const currIdx = elements.indexOf(document.activeElement);
 
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        // Optional: Implement complex spatial logic here if native focus is insufficient.
-        // For now, let standard browser focus take over but ensure we stay in-app.
         document.body.classList.add('is-navigating-via-remote');
       }
 
@@ -248,17 +222,6 @@ const App = () => {
     window.addEventListener('keydown', handleRemoteInput);
     return () => window.removeEventListener('keydown', handleRemoteInput);
   }, [currentPage]);
-
-  useEffect(() => {
-    const focusTimer = setTimeout(() => {
-      const focusable = document.querySelector('button, [href], input, [tabindex="0"]');
-      if (focusable && !isMobile) {
-        focusable.focus();
-        document.body.classList.add('is-navigating-via-remote');
-      }
-    }, 500); // Small delay to allow page transition animations
-    return () => clearTimeout(focusTimer);
-  }, [currentPage, activeTab]);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -324,23 +287,6 @@ const App = () => {
     }, 500);
     return () => clearTimeout(delayDebounce);
   }, [searchQuery, category]);
-
-  useEffect(() => {
-    const handleDeepLink = () => {
-      const path = window.location.pathname;
-      if (path.startsWith('/party/')) {
-        const idFromUrl = path.split('/party/')[1];
-        if (idFromUrl) {
-          setActivePartyId(idFromUrl);
-          setCurrentPage('PartyRoom');
-        }
-      }
-    };
-
-    handleDeepLink();
-    window.addEventListener('popstate', handleDeepLink);
-    return () => window.removeEventListener('popstate', handleDeepLink);
-  }, []);
 
   useEffect(() => {
     if (currentPage === 'Home') setActiveTab('home');
@@ -463,7 +409,6 @@ const App = () => {
     }
   };
 
-  // Consolidated handleTune function
   const handleTuneChannel = (channel) => {
     setActiveStream({
       name: channel?.name || 'Live Stream',
@@ -471,8 +416,6 @@ const App = () => {
       image: channel?.image || '',
       code: channel?.country || channel?.code || 'us'
     });
-
-    // Determine destination
     setCurrentPage('LivePlayer');
     window.scrollTo(0, 0);
   };
@@ -484,11 +427,8 @@ const App = () => {
     window.scrollTo(0, 0);
   };
 
-  // --- THE GHOST PROTOCOL ---
-  // If activeMedia or activePartyId is true, we hide all navbars so the player takes 100% of the screen.
   const isPlayerActive = activeMedia || (currentPage === 'PartyRoom' && activePartyId);
 
-  // --- AIR-GAP RENDER INTERCEPT ---
   if (isTVMode) {
     return (
       <TVApp
@@ -503,17 +443,16 @@ const App = () => {
   }
 
   // --- EXISTING MOBILE/DESKTOP RENDER ---
-    return (
-      <div className="min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30 overflow-x-hidden">
-    
-        {showIntro && (
-          <div className="fixed inset-0 z-[10000]">
-            <NetplixIntro onComplete={() => setShowIntro(false)} />
-          </div>
-        )}
-         
-        {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
+  return (
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30 overflow-x-hidden relative">
       
+      {showIntro && (
+        <div className="fixed inset-0 z-[10000]">
+          <NetplixIntro onComplete={() => setShowIntro(false)} />
+        </div>
+      )}
+
+      {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
       {!isPlayerActive && (
         <div className="relative z-[9000]">
           <div className="md:hidden">
@@ -579,7 +518,7 @@ const App = () => {
           />
         )}
         {currentPage === 'PartyRoom' && activePartyId && <PartyRoom partyId={activePartyId} user={user} onLeave={() => { setActivePartyId(null); setCurrentPage('Party'); }} />}
-        {/* --- CONSOLIDATED LIVE TV --- */}
+        
         {currentPage === 'LiveTV' && !isPlayerActive && (
           <LiveTV
             onTuneChannel={handleTuneChannel}
@@ -588,7 +527,6 @@ const App = () => {
           />
         )}
 
-        {/* --- ELITE PLAYER ROUTE --- */}
         {currentPage === 'LivePlayer' && !isPlayerActive && (
           <CustomLivePlayer
             channelName={activeStream.name}
@@ -600,7 +538,6 @@ const App = () => {
           />
         )}
 
-        {/* HUB PAGES */}
         {currentPage === 'Movies' && (
           <Movies user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
         )}
@@ -620,13 +557,11 @@ const App = () => {
         {(currentPage === 'Marvel' || currentPage === 'DC' || currentPage === 'Disney' || currentPage === 'StarWars') && <UniversePage type={currentPage.toLowerCase()} user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />}
         {currentPage === 'Notifications' && <Notifications onMoreInfo={setSelectedMoreInfo} handlePlay={handlePlay} />}
 
-        {/* --- THE PLAYER --- */}
         {activeMedia && !activePartyId && (
           <Player media={activeMedia} toggleCompleted={toggleCompleted} onClose={() => setActiveMedia(null)} />
         )}
       </main>
 
-      {/* --- FOOTER: VANISHES IF PLAYER IS ACTIVE --- */}
       {!isPlayerActive && (
         <FooterNav
           activeTab={activeTab}
@@ -646,7 +581,6 @@ const App = () => {
         )
       )}
 
-      {/* MODALS */}
       {isSearchOpen && (
         <Search
           onClose={() => setIsSearchOpen(false)}
