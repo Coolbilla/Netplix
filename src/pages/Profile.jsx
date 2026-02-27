@@ -177,7 +177,7 @@ if (!user) {
     const toggleSetting = (setting) => setActiveSetting(activeSetting === setting ? null : setting);
 
     return (
-        <div className="min-h-screen bg-[#020617] pt-28 pb-32 px-6 md:px-12 relative overflow-hidden">
+        <div className="w-full bg-[#020617] pt-28 pb-32 px-6 md:px-12 relative overflow-hidden">
             {/* Environmental FX */}
             <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-neon-cyan/5 rounded-full blur-[120px] pointer-events-none -z-10" />
             <div className="absolute bottom-0 left-[-5%] w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[120px] pointer-events-none -z-10" />
