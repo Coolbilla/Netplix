@@ -140,61 +140,38 @@ const Profile = ({ user, onLogin, setCurrentPage }) => {
     };
 
     // --- CASE 1: LOGIN PROMPT (Respects Laptop Navbar) ---
-    if (!user) {
-        return (
-            <div className="w-full flex flex-col items-center justify-center bg-[#020617] pt-32 pb-20 px-6 animate-in fade-in duration-700">
-                <div className="max-w-4xl mx-auto flex flex-col items-center gap-12 w-full">
-                    
-                    {/* Login Card */}
-                    <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/5 text-center w-full max-w-2xl relative overflow-hidden bg-white/[0.01]">
-                        <div className="absolute top-0 right-0 p-8 opacity-5 -rotate-12"><Unlock size={120} /></div>
-                        <div className="w-20 h-20 bg-neon-cyan/10 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-neon-cyan/20 shadow-neon">
-                            <Lock className="text-neon-cyan" size={36} />
-                        </div>
-                        <h2 className="text-3xl md:text-5xl font-black italic text-white uppercase tracking-tighter mb-4">Neural Link Offline</h2>
-                        <p className="text-zinc-500 text-sm md:text-base mb-10 leading-relaxed uppercase tracking-widest font-bold">Initialize connection to unlock your personal viewing archive.</p>
-                        
-                        <button
-                            onClick={onLogin}
-                            className="w-full max-w-sm bg-white text-black font-black py-5 rounded-2xl hover:bg-neon-cyan transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-neon-cyan text-xs tracking-[0.3em] cursor-pointer"
-                        >
-                            ESTABLISH CONNECTION
-                        </button>
+if (!user) {
+    return (
+        <div className="w-full flex flex-col items-center justify-center bg-[#020617] pt-32 pb-20 px-6 animate-in fade-in duration-700">
+            <div className="max-w-4xl mx-auto flex flex-col items-center gap-12 w-full">
+                
+                {/* Login Card */}
+                <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/5 text-center w-full max-w-2xl relative bg-white/[0.01]">
+                    <div className="w-20 h-20 bg-neon-cyan/10 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-neon-cyan/20 shadow-neon">
+                        <Lock className="text-neon-cyan" size={36} />
                     </div>
 
-                    {/* Comparison Chart */}
-                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="glass-panel p-8 rounded-[2rem] border-neon-cyan/10 bg-neon-cyan/[0.01]">
-                            <h3 className="flex items-center gap-3 text-neon-cyan font-black uppercase tracking-widest text-sm mb-6">
-                                <Crown size={18} /> Account Benefits
-                            </h3>
-                            <ul className="space-y-4 text-left">
-                                {["Save movies to 'My List' across devices", "Resume exactly where you left off", "Host & Join global Watch Parties", "Custom profile & Bottts avatar", "Neural tailored recommendations"].map((text, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-zinc-300 text-xs font-bold leading-relaxed">
-                                        <div className="mt-1 p-0.5 bg-neon-cyan/20 rounded text-neon-cyan flex-shrink-0"><Check size={12} /></div>
-                                        {text}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div className="glass-panel p-8 rounded-[2rem] border-red-500/10 bg-red-500/[0.01]">
-                            <h3 className="flex items-center gap-3 text-red-500 font-black uppercase tracking-widest text-sm mb-6">
-                                <AlertCircle size={18} /> Guest Limitations
-                            </h3>
-                            <ul className="space-y-4 text-left">
-                                {["Viewing history resets on refresh", "No access to personal watchlist", "No Watch Party hosting privileges", "Generic guest identity", "Basic search priority"].map((text, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-zinc-500 text-xs font-bold leading-relaxed">
-                                        <div className="mt-1 p-0.5 bg-red-500/20 rounded text-red-500 flex-shrink-0"><X size={12} /></div>
-                                        {text}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
+                    <h2 className="text-3xl md:text-5xl font-black italic text-white uppercase tracking-tighter mb-4">
+                        Neural Link Offline
+                    </h2>
+
+                    <p className="text-zinc-500 text-sm md:text-base mb-10 leading-relaxed uppercase tracking-widest font-bold">
+                        Initialize connection to unlock archive.
+                    </p>
+                    
+                    <button
+                        onClick={onLogin}
+                        className="w-full max-w-sm bg-white text-black font-black py-5 rounded-2xl hover:bg-neon-cyan transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] text-xs tracking-[0.3em]"
+                    >
+                        ESTABLISH CONNECTION
+                    </button>
                 </div>
+
+                {/* Comparison Chart naturally sits below */}
             </div>
-        );
-    }
+        </div>
+    );
+}
 
     // --- CASE 2: LOGGED IN DASHBOARD ---
     const toggleSetting = (setting) => setActiveSetting(activeSetting === setting ? null : setting);
