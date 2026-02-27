@@ -609,9 +609,15 @@ const App = () => {
           <MyList user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />
         )}
         
-        {/* FIX: ROUTE WRAPPED IN CONDITION TO PREVENT OVERLAP */}
+        {/* --- PROFILE PAGE (SCOPED CONTAINER FIX) --- */}
         {currentPage === 'Profile' && (
-          <Profile user={user} onLogin={handleLogin} setCurrentPage={setCurrentPage} />
+          <div className="relative w-full z-10">
+            <Profile
+              user={user}
+              onLogin={handleLogin}
+              setCurrentPage={setCurrentPage}
+            />
+          </div>
         )}
 
         {(currentPage === 'Marvel' || currentPage === 'DC' || currentPage === 'Disney' || currentPage === 'StarWars') && <UniversePage type={currentPage.toLowerCase()} user={user} handlePlay={handlePlay} onMoreInfo={setSelectedMoreInfo} />}
