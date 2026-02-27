@@ -28,6 +28,9 @@ import InstallButton from './components/InstallButton';
 import Navbar from './components/Navbar';
 import MobileHeader from './components/MobileHeader'; // ADDED MOBILE HEADER IMPORT
 
+// --- CUSTOM AUTH POPUP ---
+import AuthModal from './components/AuthModal';
+
 // --- AIR-GAP: NEW TV APP IMPORT ---
 import TVApp from './tv/TVApp';
 
@@ -101,6 +104,9 @@ const App = () => {
   const [selectedMoreInfo, setSelectedMoreInfo] = useState(null);
   const [isVibeSearchOpen, setIsVibeSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  // NEW AUTH STATE
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // GLOBAL VOICE RECOGNITION
   const [voiceTranscript, setVoiceTranscript] = useState("");
@@ -267,7 +273,8 @@ const App = () => {
               history: data.history || [],
               preferences: data.preferences || [],
               completed: data.completed || [],
-              region: data.region || 'US'
+              region: data.region || 'US',
+              username: data.username // LOAD CUSTOM USERNAME
             }));
           }
         });
@@ -342,19 +349,9 @@ const App = () => {
     if (currentPage === 'MyList') setActiveTab('list');
   }, [currentPage]);
 
-  // BULLETPROOF LOGIN: Forces Popup securely to bypass Mobile Tracking Prevention
+  // NEW DYNAMIC LOGIN TRIGGER
   const handleLogin = () => {
-    // The call must be direct and synchronous to avoid popup blockers
-    signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        console.log("Logged in successfully!", result.user);
-      })
-      .catch((error) => {
-        console.error("Login Error:", error);
-        if (error.code === 'auth/popup-closed-by-user') {
-          console.log("User closed the login window.");
-        }
-      });
+    setShowAuthModal(true);
   };
 
   const handlePlay = async (media) => {
@@ -393,7 +390,7 @@ const App = () => {
   };
 
   const toggleWatchlist = async (media) => {
-    if (!user) return alert("Please login to manage your list!");
+    if (!user) { handleLogin(); return; }
     const userRef = doc(db, "users", user.uid);
     const mediaType = media.media_type || (media.first_air_date ? 'tv' : 'movie');
 
@@ -416,7 +413,7 @@ const App = () => {
 
   // --- MARK 1: COMPLETED VAULT LOGIC ---
   const toggleCompleted = async (media) => {
-    if (!user) return alert("Please login to manage your Watched list!");
+    if (!user) { handleLogin(); return; }
     const userRef = doc(db, "users", user.uid);
     const mediaType = media.media_type || (media.first_air_date ? 'tv' : 'movie');
     const isAnime = media.isAnime || media.genre_ids?.includes(16) || currentPage === 'Anime';
@@ -512,7 +509,7 @@ const App = () => {
 
       {/* --- NAVIGATION: VANISHES IF PLAYER IS ACTIVE --- */}
       {!isPlayerActive && (
-        <>
+        <div className="relative z-[9999]">
           {/* MOBILE AERO-HEADER */}
           <div className="md:hidden">
             <MobileHeader
@@ -535,7 +532,7 @@ const App = () => {
               onLogin={handleLogin}
             />
           </div>
-        </>
+        </div>
       )}
 
       <PartyToast user={user} onJoin={(id) => {
@@ -659,6 +656,11 @@ const App = () => {
           onPlay={handlePlay}
           onMoreInfo={(m) => { setSelectedMoreInfo(m); setIsVibeSearchOpen(false); }}
         />
+      )}
+
+      {/* CUSTOM AUTH POPUP */}
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} />
       )}
 
       <InstallButton />
