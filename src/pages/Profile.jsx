@@ -3,7 +3,7 @@ import {
     LogOut, Heart, Clock, User as UserIcon, Settings,
     Shield, Crown, CheckCircle, ChevronDown, Globe, Search as SearchIcon,
     Edit2, X, Sparkles, Activity, ShieldAlert, Zap, TrendingUp,
-    ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight // <--- Ensure this is here!
 } from 'lucide-react';
 import { getAuth, signOut, updateProfile } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -108,16 +108,24 @@ const StatCard = ({ icon, label, value, color, unit }) => {
 
 const NeuralFeed = ({ userRegion = 'US' }) => {
     const [localTrends, setLocalTrends] = useState([]);
-    const [status, setStatus] = useState('idle');
+    const [status, setStatus] = useState('idle'); // idle, scanning, locked
 
     useEffect(() => {
         const fetchSectorData = async () => {
             setStatus('scanning');
             try {
                 const { data } = await neuralFetch('/discover/movie', {
-                    region: userRegion, watch_region: userRegion, sort_by: 'popularity.desc', with_origin_country: userRegion
+                    region: userRegion,
+                    watch_region: userRegion,
+                    sort_by: 'popularity.desc',
+                    with_origin_country: userRegion
                 });
-                const results = data.results.length >= 5 ? data.results.slice(0, 5) : (await neuralFetch('/trending/all/day')).data.results.slice(0, 5);
+
+                // If local data is thin, fall back to general popular in that region
+                const results = data.results.length >= 5
+                    ? data.results.slice(0, 5)
+                    : (await neuralFetch('/trending/all/day')).data.results.slice(0, 5);
+
                 setLocalTrends(results);
                 setStatus('locked');
             } catch (err) {
@@ -125,6 +133,7 @@ const NeuralFeed = ({ userRegion = 'US' }) => {
                 setStatus('idle');
             }
         };
+
         fetchSectorData();
     }, [userRegion]);
 
@@ -142,22 +151,29 @@ const NeuralFeed = ({ userRegion = 'US' }) => {
                 </div>
                 <Activity size={20} className="text-zinc-800 animate-pulse" />
             </div>
+
             <div className="space-y-4">
                 {localTrends.map((item, idx) => (
                     <div key={item.id} className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/[0.03] transition-all cursor-pointer">
                         <span className="text-zinc-800 font-black italic text-xl group-hover:text-neon-cyan transition-colors">0{idx + 1}</span>
                         <div className="flex-1">
-                            <h4 className="text-[11px] font-black uppercase tracking-wider text-zinc-300 group-hover:text-white truncate">{item.title || item.name}</h4>
+                            <h4 className="text-[11px] font-black uppercase tracking-wider text-zinc-300 group-hover:text-white truncate">
+                                {item.title || item.name}
+                            </h4>
                             <div className="flex gap-3 mt-1">
                                 <span className="text-[8px] text-zinc-600 font-bold uppercase">{item.media_type}</span>
                                 <div className="h-2 w-[1px] bg-zinc-800" />
-                                <span className="text-[8px] text-neon-cyan font-black italic uppercase">{Math.round(item.vote_average * 10)}% Match</span>
+                                <span className="text-[8px] text-neon-cyan font-black italic uppercase">
+                                    {Math.round(item.vote_average * 10)}% Match
+                                </span>
                             </div>
                         </div>
                         <Zap size={14} className="text-zinc-800 group-hover:text-neon-purple transition-colors" />
                     </div>
                 ))}
             </div>
+
+            {/* HUD Scanline Effect */}
             <div className="absolute inset-0 pointer-events-none border-b border-neon-cyan/5 animate-scan opacity-20" />
         </div>
     );
@@ -172,7 +188,11 @@ const Profile = ({ user, setCurrentPage }) => {
     const auth = getAuth();
     const db = getFirestore();
 
-    const handleLogout = () => signOut(auth);
+    const handleLogout = () => {
+        signOut(auth);
+        setCurrentPage('Home');
+    };
+
     const toggleSetting = (setting) => setActiveSetting(activeSetting === setting ? null : setting);
 
     const handleUpdateAvatar = async (url) => {
@@ -189,21 +209,48 @@ const Profile = ({ user, setCurrentPage }) => {
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload a valid image file.');
+            return;
+        }
+
         setSaving(true);
         try {
             const formData = new FormData();
             formData.append("image", file);
+            
+            // Your Personal ImgBB API Key
             const IMGBB_API_KEY = "8f4532adb65b0ba72670bdd6ff433d05"; 
-            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+            
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: "POST",
+                body: formData
+            });
+            
             const data = await response.json();
-            if (data.success) { await handleUpdateAvatar(data.data.url); }
-        } catch (error) { console.error("Upload Error:", error); setSaving(false); }
+            
+            if (data.success) {
+                const downloadURL = data.data.url;
+                await handleUpdateAvatar(downloadURL); 
+            } else {
+                throw new Error("ImgBB server rejected the image.");
+            }
+        } catch (error) {
+            console.error("Upload Error:", error);
+            alert("Upload failed! Please check your internet connection and try again.");
+            setSaving(false);
+        }
     };
 
     const toggleGenre = async (genre) => {
         const currentPrefs = user.preferences || [];
-        const newPrefs = currentPrefs.includes(genre) ? currentPrefs.filter(g => g !== genre) : [...currentPrefs, genre];
-        await setDoc(doc(db, "users", user.uid), { preferences: newPrefs }, { merge: true });
+        const newPrefs = currentPrefs.includes(genre)
+            ? currentPrefs.filter(g => g !== genre)
+            : [...currentPrefs, genre];
+        try {
+            await setDoc(doc(db, "users", user.uid), { preferences: newPrefs }, { merge: true });
+        } catch (error) { console.error("Error updating preferences:", error); }
     };
 
     const updateRegion = async (code) => {
@@ -212,21 +259,38 @@ const Profile = ({ user, setCurrentPage }) => {
             const userRef = doc(db, "users", user.uid);
             await setDoc(userRef, { region: code }, { merge: true });
             console.log("Uplink Established.");
-        } catch (error) { console.error("Uplink Interrupted by Firewall:", error); }
+        } catch (error) {
+            console.error("Uplink Interrupted by Firewall:", error);
+        }
     };
 
     return (
         <div className="min-h-screen bg-[#020617] pt-32 pb-32 px-6 md:px-12 relative overflow-hidden">
+            {/* Environmental FX */}
             <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-neon-cyan/5 rounded-full blur-[120px] pointer-events-none -z-10" />
             <div className="absolute bottom-0 left-[-5%] w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
             <div className="max-w-4xl mx-auto flex flex-col gap-8 relative z-10">
+
+                {/* Back to Home Button */}
+                <button onClick={() => setCurrentPage('Home')} className="flex items-center gap-2 text-zinc-500 hover:text-neon-cyan transition-colors w-fit group cursor-pointer mb-2">
+                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back to Dashboard</span>
+                </button>
+
+                {/* 1. Profile HUD Header */}
                 <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border-white/5 flex flex-col md:flex-row items-center gap-10 shadow-2xl relative overflow-hidden bg-white/[0.01]">
                     <div className="absolute top-0 right-0 p-8 opacity-5"><Activity size={120} /></div>
 
+                    {/* Avatar Logic */}
                     <div className="relative group cursor-pointer flex-shrink-0" onClick={() => setShowAvatarSelect(true)}>
                         <div className="w-28 h-28 md:w-36 md:h-36 rounded-3xl overflow-hidden border-2 border-neon-cyan shadow-neon group-hover:opacity-50 transition-all duration-500 bg-zinc-900">
-                            <img src={user?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || user?.email}&backgroundColor=0f172a`} alt="Profile" className="w-full h-full object-cover" />
+                            {/* DYNAMIC AVATAR INJECTION */}
+                            <img 
+                                src={user?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || user?.email}&backgroundColor=0f172a`} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover" 
+                            />
                         </div>
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="bg-neon-cyan p-3 rounded-full text-black shadow-neon"><Edit2 size={20} /></div>
@@ -238,6 +302,7 @@ const Profile = ({ user, setCurrentPage }) => {
                             <div className="h-px w-8 bg-neon-cyan" />
                             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Verified Identity</h3>
                         </div>
+                        {/* DYNAMIC USERNAME INJECTION */}
                         <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase mb-2 leading-none truncate">
                             {user?.username || user?.displayName || user?.email?.split('@')[0]}
                         </h1>
@@ -253,22 +318,27 @@ const Profile = ({ user, setCurrentPage }) => {
                         </div>
                     </div>
 
-                    <button onClick={handleLogout} className="md:absolute top-10 right-10 flex items-center gap-2 glass-button text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 group cursor-pointer">
+                    <button onClick={handleLogout} className="md:absolute top-10 right-10 flex items-center gap-2 glass-button text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 group cursor-pointer z-20">
                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Disconnect
                     </button>
                 </div>
 
+                {/* 2. Stats & Neural Feed Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Your existing Stats */}
                     <div className="lg:col-span-1 space-y-6">
                         <StatCard icon={<Heart size={28} />} label="Stored Archive" value={user?.watchlist?.length} color="cyan" unit="Entries" />
                         <StatCard icon={<Clock size={28} />} label="Total Runtime" value={user?.history?.length} color="purple" unit="Cycles" />
                     </div>
+
+                    {/* Right Column: The New Neural Feed */}
                     <div className="lg:col-span-2">
                         <NeuralFeed userRegion={user.region || 'US'} />
                     </div>
                 </div>
 
+                {/* 3. Settings Interface */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-4 mb-6 opacity-60">
                         <div className="h-px w-10 bg-neon-cyan" />
@@ -276,6 +346,7 @@ const Profile = ({ user, setCurrentPage }) => {
                     </div>
 
                     <div className="flex flex-col gap-4">
+                        {/* GENRE PREFERENCES */}
                         <div className="glass-panel rounded-3xl border-white/5 overflow-hidden transition-all duration-500 bg-white/[0.01]">
                             <div onClick={() => toggleSetting('preferences')} className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/[0.02]">
                                 <div className="flex items-center gap-5">
@@ -307,6 +378,7 @@ const Profile = ({ user, setCurrentPage }) => {
                             )}
                         </div>
 
+                        {/* REGION INTERFACE */}
                         <div className="glass-panel rounded-3xl border-white/5 overflow-hidden transition-none bg-white/[0.01]">
                             <div onClick={() => toggleSetting('region')} className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/[0.02]">
                                 <div className="flex items-center gap-5">
@@ -321,6 +393,7 @@ const Profile = ({ user, setCurrentPage }) => {
 
                             {activeSetting === 'region' && (
                                 <div className="p-8 pt-0 border-t border-white/5 bg-black/20">
+                                    {/* Search Field */}
                                     <div className="flex gap-3 mt-6 mb-4">
                                         <div className="relative flex-1 group">
                                             <SearchIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-neon-cyan" />
@@ -340,14 +413,15 @@ const Profile = ({ user, setCurrentPage }) => {
                                         </button>
                                     </div>
 
+                                    {/* Scrollable Container */}
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
                                         {COUNTRIES.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((c) => (
                                             <button
                                                 key={c.code}
-                                                type="button" 
+                                                type="button" // Prevents form submission interference
                                                 onClick={(e) => {
                                                     e.preventDefault();
-                                                    e.stopPropagation(); 
+                                                    e.stopPropagation(); // Stops the click from "falling through"
                                                     updateRegion(c.code);
                                                 }}
                                                 className={`relative z-50 flex items-center justify-between px-4 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border cursor-pointer active:scale-95 ${user.region === c.code
@@ -364,6 +438,7 @@ const Profile = ({ user, setCurrentPage }) => {
                             )}
                         </div>
 
+                        {/* ACCOUNT INTERFACE */}
                         <div className="glass-panel rounded-3xl border-white/5 overflow-hidden transition-all duration-500 bg-white/[0.01]">
                             <div onClick={() => toggleSetting('account')} className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/[0.02]">
                                 <div className="flex items-center gap-5">
@@ -389,11 +464,21 @@ const Profile = ({ user, setCurrentPage }) => {
                 </div>
             </div>
 
+            {/* AVATAR SELECTION MODAL */}
             {showAvatarSelect && (
-                <div className="fixed inset-0 z-[600] bg-[#020617]/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in">
+                <div className="fixed inset-0 z-[6000] bg-[#020617]/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in">
                     <div className="glass-panel p-8 md:p-12 rounded-[3rem] max-w-xl w-full border-white/10 relative shadow-2xl bg-[#0a0a0a]">
                         <button onClick={() => setShowAvatarSelect(false)} className="absolute top-8 right-8 glass-button p-2 rounded-full text-zinc-500 hover:text-white cursor-pointer"><X size={20} /></button>
                         <h2 className="text-3xl font-black italic text-white uppercase tracking-tighter mb-10">Sync <span className="text-neon-cyan">Identity</span></h2>
+                        <div className="mb-8 relative group cursor-pointer">
+                            <input type="file" accept="image/*" onChange={handleFileUpload} disabled={saving} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                            <div className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-3xl transition-all ${saving ? 'border-neon-cyan/50 bg-neon-cyan/5' : 'border-white/10 group-hover:border-neon-cyan/50 group-hover:bg-neon-cyan/5'}`}>
+                                <Upload size={32} className={`mb-3 transition-colors ${saving ? 'text-neon-cyan animate-bounce' : 'text-zinc-500 group-hover:text-neon-cyan'}`} />
+                                <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">
+                                    {saving ? 'Transmitting...' : 'Upload Custom Image'}
+                                </span>
+                            </div>
+                        </div>
                         <div className="grid grid-cols-3 gap-6">
                             {AVATARS.map((url, idx) => (
                                 <div key={idx} onClick={() => !saving && handleUpdateAvatar(url)}
