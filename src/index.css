@@ -400,3 +400,14 @@ body {
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
+
+/* SMART TV SPATIAL NAVIGATION FOCUS */
+.tv-focused {
+  outline: 4px solid #00ffff !important;
+  /* Your Neon Cyan color */
+  outline-offset: 4px;
+  transform: scale(1.05) !important;
+  z-index: 50;
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+  border-radius: inherit;
+}
