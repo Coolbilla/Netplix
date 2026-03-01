@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import Focusable from './Focusable';
 
 const TVRow = ({ title, data, onSelect, onInfo, onFocusItem }) => {
     const rowRef = useRef(null);
@@ -23,16 +24,12 @@ const TVRow = ({ title, data, onSelect, onInfo, onFocusItem }) => {
                 className="flex flex-nowrap items-start gap-8 overflow-x-auto no-scrollbar py-8 px-12 snap-x w-full"
             >
                 {data.map((m) => (
-                    <div
+                    <Focusable
                         key={m.id}
-                        tabIndex="0"
-                        onFocus={(e) => handleFocus(e, m)}
+                        onEnter={() => onSelect(m)}
                         onClick={() => onSelect(m)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') onSelect(m);
-                            if (e.key === 'i' || e.key === 'I') onInfo(m);
-                        }}
-                        className="relative shrink-0 w-[260px] md:w-[300px] aspect-[2/3] rounded-[2rem] overflow-hidden border-4 border-transparent outline-none focus:border-white focus:scale-110 focus:shadow-[0_0_60px_rgba(255,255,255,0.4)] focus:z-50 bg-[#0a0a0a] group transition-all duration-300 snap-center cursor-pointer"
+                        activeClass="border-white scale-110 shadow-[0_0_60px_rgba(255,255,255,0.4)] z-50"
+                        className="relative shrink-0 w-[260px] md:w-[300px] aspect-[2/3] rounded-[2rem] overflow-hidden border-4 border-transparent outline-none bg-[#0a0a0a] group transition-all duration-300 snap-center cursor-pointer"
                     >
                         <img
                             src={`https://images.weserv.nl/?url=https://image.tmdb.org/t/p/w500${m.poster_path}`}
@@ -45,7 +42,7 @@ const TVRow = ({ title, data, onSelect, onInfo, onFocusItem }) => {
                                 {m.title || m.name}
                             </h4>
                         </div>
-                    </div>
+                    </Focusable>
                 ))}
             </div>
         </div>
