@@ -48,14 +48,14 @@ const Player = ({ media, toggleCompleted, onClose }) => {
         : `https://vidsrc-embed.su/embed/${tmdbId}`;
 
     const twoEmbedUrl = type === 'tv'
-        ? `https://2embed.org/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://2embed.org/embed/movie/${tmdbId}`;
+        ? `https://111movies.net/tv/${tmdbId}/${season}/${episode}`
+        : `https://111movies.net/movie/${tmdbId}`;
 
     // DETERMINE ACTIVE STREAM
     let streamUrl = cinezoUrl;
     if (activeServer === 'vidora') streamUrl = vidoraUrl;
     if (activeServer === 'vidsrc') streamUrl = vidsrcUrl;
-    if (activeServer === '2embed') streamUrl = twoEmbedUrl;
+    if (activeServer === '111movies') streamUrl = twoEmbedUrl;
 
     const handleMarkAsCompleted = () => {
         toggleCompleted(media); // Fires the function to move it to the Vault
@@ -63,10 +63,10 @@ const Player = ({ media, toggleCompleted, onClose }) => {
     };
 
     const serverOptions = [
-        { id: 'cinezo', name: 'Server 1 (No Ads)' },
-        { id: 'vidsrc', name: 'Server 2 (Fast)' },
+        { id: 'cinezo', name: 'Server 1' },
+        { id: 'vidsrc', name: 'Server 2' },
         { id: 'vidora', name: 'Server 3' },
-        { id: '2embed', name: 'Server 4 (Backup)' }
+        { id: '111movies', name: 'Server 4' }
     ];
 
     // --- RENDER THE POST-PLAY SCREEN IF THEY CLICKED 'X' ---
