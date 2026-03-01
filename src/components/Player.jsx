@@ -107,13 +107,14 @@ const Player = ({ media, toggleCompleted, onClose }) => {
         <div className="fixed inset-0 z- bg-[#020202] flex flex-col animate-in fade-in duration-500 overflow-hidden font-sans">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vh] bg-neon-cyan/5 blur-[120px] rounded-full pointer-events-none" />
 
-            <div className="absolute top-0 left-0 w-full p-4 md:p-8 z- flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pointer-events-none">
+            {/* FIXED: Z-INDEX 50 ENSURES THE HEADER/DROPDOWN IS ALWAYS ABOVE THE IFRAME */}
+            <div className="absolute top-0 left-0 w-full p-4 md:p-8 z-50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pointer-events-none">
                 
                 {/* Left Side: Close Button & Title */}
                 <div className="pointer-events-auto flex items-center gap-4 bg-black/40 backdrop-blur-xl border border-white/10 p-2 pr-6 rounded-full shadow-2xl">
                     <button
                         onClick={() => setShowPostPlay(true)} // TRIGGERS THE INTERCEPTOR INSTEAD OF CLOSING
-                        className="bg-white/10 hover:bg-red-500/80 text-white p-3 rounded-full transition-all duration-300 group"
+                        className="bg-white/10 hover:bg-red-500/80 text-white p-3 rounded-full transition-all duration-300 group cursor-pointer"
                     >
                         <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
                     </button>
@@ -131,7 +132,7 @@ const Player = ({ media, toggleCompleted, onClose }) => {
                 <div className="pointer-events-auto relative" ref={dropdownRef}>
                     <button 
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center gap-3 bg-black/40 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-full shadow-2xl hover:bg-white/5 transition-colors"
+                        className="flex items-center gap-3 bg-black/40 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-full shadow-2xl hover:bg-white/5 transition-colors cursor-pointer"
                     >
                         <MonitorPlay size={16} className="text-zinc-400" />
                         <div className="flex flex-col items-start text-left">
@@ -153,7 +154,7 @@ const Player = ({ media, toggleCompleted, onClose }) => {
                                         setActiveServer(server.id);
                                         setIsDropdownOpen(false);
                                     }}
-                                    className={`w-full text-left px-5 py-4 text-xs font-bold transition-all flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/5 ${
+                                    className={`w-full text-left px-5 py-4 text-xs font-bold transition-all flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/5 cursor-pointer ${
                                         activeServer === server.id ? 'text-neon-cyan bg-neon-cyan/5' : 'text-zinc-300'
                                     }`}
                                 >
@@ -167,7 +168,8 @@ const Player = ({ media, toggleCompleted, onClose }) => {
             </div>
 
             {/* The Video iframe Container */}
-            <div className="flex-1 w-full h-full relative z- md:p-12 md:pt-28 pb-0 flex items-center justify-center">
+            {/* FIXED: Added z-0 so it stays beneath the dropdown */}
+            <div className="flex-1 w-full h-full relative z-0 md:p-12 md:pt-28 pb-0 flex items-center justify-center">
                 <div className="relative w-full h-full max-w-[1600px] mx-auto md:rounded-[2rem] overflow-hidden bg-black md:border border-white/10 md:shadow-[0_0_60px_rgba(0,0,0,0.8)] group">
                     <iframe 
                         key={streamUrl} 
@@ -184,10 +186,10 @@ const Player = ({ media, toggleCompleted, onClose }) => {
 
             {/* Ad Warning */}
             {showAdWarning && (
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z- bg-black/80 backdrop-blur-xl border border-white/10 text-white pl-4 pr-2 py-2 rounded-full flex items-center gap-4 shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-500 pointer-events-auto w-max max-w-[90vw]">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 bg-black/80 backdrop-blur-xl border border-white/10 text-white pl-4 pr-2 py-2 rounded-full flex items-center gap-4 shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-500 pointer-events-auto w-max max-w-[90vw]">
                     <ShieldAlert className="text-yellow-500 shrink-0" size={18} />
                     <p className="text-[10px] md:text-xs font-medium tracking-wide text-zinc-300 truncate">Using third-party servers. <strong className="text-white">Brave Browser</strong> recommended.</p>
-                    <button onClick={() => setShowAdWarning(false)} className="bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors shrink-0"><X size={14} /></button>
+                    <button onClick={() => setShowAdWarning(false)} className="bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors shrink-0 cursor-pointer"><X size={14} /></button>
                 </div>
             )}
         </div>
