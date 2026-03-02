@@ -53,7 +53,7 @@ const Player = ({ media, toggleCompleted, onClose }) => {
     // SERVER URLS
     const cinezoUrl = getFlixerUrl(tmdbId, type, season, episode);
     const vidoraUrl = type === 'tv' ? `https://vidora.me/tv/${tmdbId}/${season}/${episode}?autoplay=true&colour=00ffff` : `https://vidora.su/movie/${tmdbId}?autoplay=true&colour=00ffff`;
-    const vidsrcUrl = type === 'tv' ? `https://vidsrc-embed.ru/embed/${tmdbId}/${season}-${episode}` : `https://vidsrc-embed.ru/embed/${tmdbId}`;
+    const vidsrcUrl = type === 'tv' ? `https://vidsrc-embed.su/embed/${tmdbId}/${season}-${episode}` : `https://vidsrc-embed.su/embed/${tmdbId}`;
     const twoEmbedUrl = type === 'tv' ? `https://111movies.net/tv/${tmdbId}/${season}/${episode}` : `https://111movies.net/movie/${tmdbId}`;
 
     let streamUrl = cinezoUrl;
